@@ -42,7 +42,7 @@ cp credentials.json.example credentials.json
       ],
       "url": "https://www.crunchyroll.com/series/GVDHX85EQ/catch-me-at-the-ballpark" -> URL of the anime (Required)
     },
-    { --> Delete all languages and seasons
+    { --> Download all languages and seasons
       "url": "https://www.crunchyroll.com/series/GVDHX85EQ/catch-me-at-the-ballpark" -> URL of the anime (Required)
     },
   ```
