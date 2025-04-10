@@ -1,0 +1,106 @@
+credentials.json
+crunchyroll_cookies.pkl
+screenshots
+__pycache__
+.pytest_cache
+downloaded_files
+latest_logs
+output
+
+# Ignore all audio files
+*.mp3
+*.wav
+*.flac
+*.aac
+*.ogg
+*.m4a
+*.wma
+
+# Ignore all video files
+*.mp4
+*.ts
+*.avi
+*.mkv
+*.mov
+*.wmv
+*.flv
+*.webm
+
+# Extras
+*.lwi
+*.srt
+*.ass
+*.php
+*.m3u8
+*.log
+
+# Allow folders
+!assets/
+
+vsrepo/
+vapoursynth-autocrop/
+images/
+
+# Python common files, folders
+
+# Bytecode and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+env/
+*.venv
+.Python
+
+# Pip and package manager files
+pip-log.txt
+pip-delete-this-directory.txt
+poetry.lock
+
+# Distribution / Build folders
+build/
+dist/
+*.egg-info/
+.eggs/
+wheelhouse/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Pytest and coverage reports
+.coverage
+.tox/
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Logs and debug files
+*.log
+*.out
+*.err
+debug.log
+
+# MyPy and type checking
+.mypy_cache/
+.dmypy.json
+.pyre/
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS system files
+.DS_Store
+
+# Windows system files
+Thumbs.db
+desktop.ini
+
+# vsjet
+.vsjet/
+
