@@ -23,7 +23,7 @@ cp credentials.json.example credentials.json
 
 - Add crunchyroll premium account and password in `credentials.json` file.
 - Change `seasons`, `langs`, `url` in `animes.json`, then run the following command:
-- You can also download subtitles for specific languages and season numbers by adding them to the `lang` and seasons list in `animes.json`. If not specified, the script will download subtitles for all languages. Same with season numbers, it will download subtitles for all seasons numbers. The season number is from 1 to n, drop drop-down list in crunchyroll websites.
+- You can also download subtitles for specific languages and season numbers by adding them to the `lang` and `seasons` in animes.json. If not specified, the script will download subtitles for all languages and all seasons. Season numbers start from 1 and go up to n, as listed in the season drop-down menu on the Crunchyroll website.
 
   ```json
     {
@@ -34,6 +34,15 @@ cp credentials.json.example credentials.json
       "seasons": [ --> List of season numbers to download subtitles for (Optional)
         1,2
       ],
+      "url": "https://www.crunchyroll.com/series/GVDHX85EQ/catch-me-at-the-ballpark" -> URL of the anime (Required)
+    },
+    {
+      "seasons": [ --> Only download the first season, and all languages
+        1
+      ],
+      "url": "https://www.crunchyroll.com/series/GVDHX85EQ/catch-me-at-the-ballpark" -> URL of the anime (Required)
+    },
+    { --> Delete all languages and seasons
       "url": "https://www.crunchyroll.com/series/GVDHX85EQ/catch-me-at-the-ballpark" -> URL of the anime (Required)
     },
   ```
