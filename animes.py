@@ -17,7 +17,6 @@ def start_download_anime(sb):
     for anime in animes:
         print(f"Checking anime URL: {anime['url']}")
         seasons = anime.get("seasons") or get_all_season_indexes(sb, anime.get("url")) or []
-        print(seasons)
         anime["lang"] = anime.get("lang") or []
         for season in seasons:
             handle_season(sb, anime, season, list_downloaded)
