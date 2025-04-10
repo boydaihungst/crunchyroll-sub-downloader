@@ -54,7 +54,7 @@ def get_all_season_indexes(sb, anime_url):
             sb.wait_for_element("css selector", "[class^='dropdown-content__children']", timeout=15)
             season_count = len(
                 sb.driver.find_elements(
-                    "css selector", "[class^='dropdown-content__children'] > div[clsas^='extended-option']"
+                    "css selector", "[class^='dropdown-content__children'] div[class^='extended-option']"
                 )
             )
             return list(range(1, season_count + 1))
