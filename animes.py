@@ -22,6 +22,8 @@ def start_download_anime(sb):
 
 
 def handle_season(sb, series, season, list_downloaded):
+    if not series.get("url") or season < 1:
+        return
     xv = [x for x in list_downloaded if x["url"] == series["url"] and x["season"] == season]
     skip_urls = list(xv[0]["downloaded"]) if xv else list()
     sb.open(series["url"])
