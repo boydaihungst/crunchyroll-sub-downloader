@@ -15,21 +15,23 @@ def start_download_anime(sb):
     animes = json.load(f)
     list_downloaded = json.load(f2)
     for anime in animes:
+        print(f"Checking anime URL: {anime['url']}")
         seasons = anime.get("seasons") or get_all_season_indexes(sb, anime.get("url")) or []
+        print(seasons)
         anime["lang"] = anime.get("lang") or []
         for season in seasons:
             handle_season(sb, anime, season, list_downloaded)
 
 
 def handle_season(sb, series, season, list_downloaded):
-    if not series.get("url") or season < 1:
+    if not series.get("url") or int(season) < 1:
         return
     xv = [x for x in list_downloaded if x["url"] == series["url"] and x["season"] == season]
     skip_urls = list(xv[0]["downloaded"]) if xv else list()
     sb.open(series["url"])
 
     try:
-        print("Downloading for season number: " + str(season))
+        print(f"Downloading for season number: {str(season)}")
         select_season_from_dropdown_list(sb, season)
         click_load_more_btn(sb)
         episode_urls = get_list_of_episode_urls(sb)
@@ -56,8 +58,9 @@ def get_all_season_indexes(sb, anime_url):
                     "css selector", "[class^='dropdown-content__children'] > div[clsas^='extended-option']"
                 )
             )
-            season_indexes = list(range(1, season_count + 1))
-            return season_indexes
+            return list(range(1, season_count + 1))
+        else:
+            return [1]
     except Exception as e:
         print(f"Error: {e}")
         traceback.print_exc()
