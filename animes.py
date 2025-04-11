@@ -7,6 +7,8 @@ from urllib.parse import urljoin, urlparse
 
 import screenshot
 
+new_downloaded_subtitles = {}
+
 
 def start_download_anime(sb):
     print("Loading animes list")
@@ -20,6 +22,12 @@ def start_download_anime(sb):
         anime["lang"] = anime.get("lang") or []
         for season in seasons:
             handle_season(sb, anime, season, list_downloaded)
+    if new_downloaded_subtitles:
+        print(f"New subtitles downloaded:")
+        for key, value in new_downloaded_subtitles.items():
+            print(f"    {key}:")
+            for v in value:
+                print(f"    {v}")
 
 
 def handle_season(sb, series, season, list_downloaded):
@@ -202,6 +210,10 @@ def save_episode_subtitles(sb, season, tvshow_info, lang_to_download=[], downloa
                 "url": os.path.join(tvshow_info["metadata"]["series_title"], str(season), save_filename),
             }
         )
+        add_new_downloaded_subtitle(
+            tvshow_info["metadata"]["series_title"],
+            f"S{str(season)}E{tvshow_info["metadata"]["display_episode_number"]} ({list_subtitle_from_crunchyroll[subtitle]["language"]}): {tvshow_info["metadata"]["title"]}",
+        )
     return subtitles
 
 
@@ -315,6 +327,13 @@ def go_back_to_ep_lists_page(sb, season):
         print(f"Error: {e}")
         traceback.print_exc()
         screenshot.take(sb)
+
+
+def add_new_downloaded_subtitle(key, value):
+    global new_downloaded_subtitles
+    if key not in new_downloaded_subtitles:
+        new_downloaded_subtitles[key] = []
+    new_downloaded_subtitles[key].append(value)
 
 
 # def accept_consent(sb):
