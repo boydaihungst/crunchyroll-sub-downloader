@@ -27,7 +27,7 @@ def start_download_anime(sb):
         for key, value in new_downloaded_subtitles.items():
             print(f"    {key}:")
             for v in value:
-                print(f"    {v}")
+                print(f"        {v}")
 
 
 def handle_season(sb, series, season, list_downloaded):
