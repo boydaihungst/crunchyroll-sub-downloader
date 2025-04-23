@@ -214,7 +214,7 @@ def save_episode_subtitles(sb, season, tvshow_info, lang_to_download=[], downloa
                 "url": output,
             }
         )
-        if list_subtitle_from_crunchyroll[subtitle]["language"] in ["vi_VN"]:
+        if list_subtitle_from_crunchyroll[subtitle]["language"] == "vi_VN":
             subtitle_processor.remove_unused_styles(output, output, is_replace_font=True)
         else:
             subtitle_processor.remove_unused_styles(output, output, is_replace_font=False)
