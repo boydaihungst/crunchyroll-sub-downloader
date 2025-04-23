@@ -25,6 +25,11 @@ cp credentials.json.example credentials.json
 - Change `seasons`, `langs`, `url` in `animes.json`, then run the following command:
 - You can also download subtitles for specific languages and season numbers by adding them to the `lang` and `seasons` in animes.json. If not specified, the script will download subtitles for all languages and all seasons. Season numbers start from 1 and go up to n, as listed in the season drop-down menu on the Crunchyroll website.
 
+- Some popular language codes:
+
+  - "vi-VN", "en-US", "th-TH", "id-ID", "ms-MY", "ja-JP", "ru-RU", "pt-BR", "it-IT", "fr-FR", "es-ES", "es-419", "de-DE", "ar-SA"
+  - If you want to download subtitles for a language that is not listed, you can get rid of `lang` in animes.json to download subtitles for all languages -> to get the language code.
+
   ```json
     {
       "lang": [ --> List of languages to download subtitles for (Optional)

@@ -6,6 +6,7 @@ import traceback
 from urllib.parse import urljoin, urlparse
 
 import screenshot
+import subtitle_processor
 
 new_downloaded_subtitles = {}
 
@@ -28,6 +29,8 @@ def start_download_anime(sb):
             print(f"    {key}:")
             for v in value:
                 print(f"        {v}")
+    else:
+        print("No new subtitles.")
 
 
 def handle_season(sb, series, season, list_downloaded):
@@ -203,13 +206,18 @@ def save_episode_subtitles(sb, season, tvshow_info, lang_to_download=[], downloa
             ]
         )
         sb.save_file_as(list_subtitle_from_crunchyroll[subtitle]["url"], save_filename, save_folder)
+        output = os.path.join(save_folder, save_filename)
 
         subtitles.append(
             {
                 "lang": list_subtitle_from_crunchyroll[subtitle]["language"],
-                "url": os.path.join(tvshow_info["metadata"]["series_title"], str(season), save_filename),
+                "url": output,
             }
         )
+        if list_subtitle_from_crunchyroll[subtitle]["language"] in ["vi_VN"]:
+            subtitle_processor.remove_unused_styles(output, output, is_replace_font=True)
+        else:
+            subtitle_processor.remove_unused_styles(output, output, is_replace_font=False)
         add_new_downloaded_subtitle(
             tvshow_info["metadata"]["series_title"],
             f"S{str(season)}E{tvshow_info["metadata"]["display_episode_number"]} ({list_subtitle_from_crunchyroll[subtitle]["language"]}): {tvshow_info["metadata"]["title"]}",
