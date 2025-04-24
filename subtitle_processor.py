@@ -188,11 +188,10 @@ if __name__ == "__main__":
 
     if os.path.isdir(args.input):
         input_dir = args.input
-        output_dir = args.output if args.output else input_dir
 
-        os.makedirs(output_dir, exist_ok=True)
-
-        for file_path in glob.glob(os.path.join(input_dir, "*.ass")):
+        for file_path in glob.glob(os.path.join(input_dir, "**", "*.ass"), recursive=True):
+            output_dir = args.output if args.output else os.path.dirname(file_path)
+            os.makedirs(output_dir, exist_ok=True)
             filename = os.path.basename(file_path)
             output_path = os.path.join(output_dir, filename)
             remove_unused_styles(file_path, output_path, is_replace_font=replace_font)
