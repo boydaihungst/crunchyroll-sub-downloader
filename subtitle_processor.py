@@ -19,7 +19,7 @@ def remove_unused_styles(input_file, output_file, is_replace_font=False):
         for style in doc.styles:
             if style.name == "Default" and style.fontname == "Arial Unicode MS" and style.fontsize == 20:
                 style.fontname = "UVN Sach Vo"
-                style.fontsize = 75
+                style.fontsize = 81
                 style.primary_color = ass.data.Color.from_ass("&H00FFFFFF")
                 style.secondary_color = ass.data.Color.from_ass("&H00000000")
                 style.outline_color = ass.data.Color.from_ass("&H4D000000")
@@ -43,7 +43,7 @@ def remove_unused_styles(input_file, output_file, is_replace_font=False):
 
             if style.name == "OS" and style.fontname == "Arial Unicode MS" and style.fontsize == 18:
                 style.fontname = "UVN Sach Vo"
-                style.fontsize = 75
+                style.fontsize = 81
                 style.primary_color = ass.data.Color.from_ass("&H00FFFFFF")
                 style.secondary_color = ass.data.Color.from_ass("&H00000000")
                 style.outline_color = ass.data.Color.from_ass("&H4D000000")
@@ -67,7 +67,7 @@ def remove_unused_styles(input_file, output_file, is_replace_font=False):
 
             if style.name == "Italics" and style.fontname == "Arial Unicode MS" and style.fontsize == 20:
                 style.fontname = "UVN Sach Vo"
-                style.fontsize = 75
+                style.fontsize = 81
                 style.primary_color = ass.data.Color.from_ass("&H00FFFFFF")
                 style.secondary_color = ass.data.Color.from_ass("&H00000000")
                 style.outline_color = ass.data.Color.from_ass("&H4D000000")
@@ -91,7 +91,7 @@ def remove_unused_styles(input_file, output_file, is_replace_font=False):
 
             if style.name == "On Top" and style.fontname == "Arial Unicode MS" and style.fontsize == 20:
                 style.fontname = "UVN Sach Vo"
-                style.fontsize = 75
+                style.fontsize = 81
                 style.primary_color = ass.data.Color.from_ass("&H00FFFFFF")
                 style.secondary_color = ass.data.Color.from_ass("&H00000000")
                 style.outline_color = ass.data.Color.from_ass("&H4D000000")
@@ -115,7 +115,7 @@ def remove_unused_styles(input_file, output_file, is_replace_font=False):
 
             if style.name == "DefaultLow" and style.fontname == "Arial Unicode MS" and style.fontsize == 20:
                 style.fontname = "UVN Sach Vo"
-                style.fontsize = 75
+                style.fontsize = 81
                 style.primary_color = ass.data.Color.from_ass("&H00FFFFFF")
                 style.secondary_color = ass.data.Color.from_ass("&H00000000")
                 style.outline_color = ass.data.Color.from_ass("&H4D000000")
@@ -139,7 +139,7 @@ def remove_unused_styles(input_file, output_file, is_replace_font=False):
 
             if style.fontname == "Noto Sans" and style.fontsize == 100:
                 style.fontname = "UVN Sach Vo"
-                style.fontsize = 75
+                style.fontsize = 81
                 style.primary_color = ass.data.Color.from_ass("&H00FFFFFF")
                 style.secondary_color = ass.data.Color.from_ass("&H00000000")
                 style.outline_color = ass.data.Color.from_ass("&H4D000000")
