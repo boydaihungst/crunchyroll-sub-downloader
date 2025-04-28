@@ -38,7 +38,7 @@ def remove_unused_styles(input_file, output_file, is_replace_font=False):
                 style.alignment = 2
                 style.margin_l = 60
                 style.margin_r = 60
-                style.margin_v = 40
+                style.margin_v = 50
                 style.encoding = 1
 
             if style.name == "OS" and style.fontname == "Arial Unicode MS" and style.fontsize == 18:
@@ -62,7 +62,7 @@ def remove_unused_styles(input_file, output_file, is_replace_font=False):
                 style.alignment = 8
                 style.margin_l = 60
                 style.margin_r = 60
-                style.margin_v = 30
+                style.margin_v = 50
                 style.encoding = 1
 
             if style.name == "Italics" and style.fontname == "Arial Unicode MS" and style.fontsize == 20:
@@ -86,7 +86,7 @@ def remove_unused_styles(input_file, output_file, is_replace_font=False):
                 style.alignment = 2
                 style.margin_l = 60
                 style.margin_r = 60
-                style.margin_v = 30
+                style.margin_v = 50
                 style.encoding = 1
 
             if style.name == "On Top" and style.fontname == "Arial Unicode MS" and style.fontsize == 20:
@@ -110,7 +110,7 @@ def remove_unused_styles(input_file, output_file, is_replace_font=False):
                 style.alignment = 8
                 style.margin_l = 60
                 style.margin_r = 60
-                style.margin_v = 30
+                style.margin_v = 50
                 style.encoding = 1
 
             if style.name == "DefaultLow" and style.fontname == "Arial Unicode MS" and style.fontsize == 20:
@@ -134,7 +134,7 @@ def remove_unused_styles(input_file, output_file, is_replace_font=False):
                 style.alignment = 2
                 style.margin_l = 60
                 style.margin_r = 60
-                style.margin_v = 30
+                style.margin_v = 50
                 style.encoding = 1
 
             if style.fontname == "Noto Sans" and style.fontsize == 100:
@@ -158,7 +158,7 @@ def remove_unused_styles(input_file, output_file, is_replace_font=False):
                 style.alignment = 2
                 style.margin_l = 60
                 style.margin_r = 60
-                style.margin_v = 30
+                style.margin_v = 50
                 style.encoding = 1
     with open(output_file, "w", encoding="utf-8-sig") as f:
         doc.dump_file(f)
