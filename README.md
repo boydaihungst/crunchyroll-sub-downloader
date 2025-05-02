@@ -69,6 +69,9 @@ python3 main.py
 
 ### Troubleshooting
 
+> [!IMPORTANT]
+> Crunchyroll has limited the number of devices that can access their website for each account. You should deactivate other devices if encountered with the error "Too many devices". Follow this link: https://www.crunchyroll.com/account/devices
+
 If you encounter any issues, please use the following command to get the screenshot of the browser, then open an issue with output log and the screenshots attached (in `screenshots` folder).
 
 ```bash
