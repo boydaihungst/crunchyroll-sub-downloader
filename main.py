@@ -47,6 +47,7 @@ def main():
                     print("Invalid cookie, removing cookies")
                     if os.path.exists("crunchyroll_cookies.pkl"):
                         os.remove("crunchyroll_cookies.pkl")
+                    sb.driver.delete_all_cookies()
                 sb.driver.refresh()
                 if auth.is_logged_in(sb):
                     screenshot.take(sb)

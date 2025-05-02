@@ -52,7 +52,7 @@ def is_homepage_loaded(sb, selector=".shell-body", timeout=15):
     start = time.time()
     while time.time() - start < timeout:
         is_loading = sb.is_element_present("css selector", selector)
-        if is_loading:
+        if is_loading or "sso.crunchyroll.com" in sb.driver.current_url:
             sb.wait(1)
             continue
         select_profile(sb)
@@ -66,15 +66,17 @@ def login(sb):
     credentials = json.load(f)
     try_bypass_turnstile(
         sb,
-        "https://sso.crunchyroll.com/login?return_url=%2Fauthorize%3Fclient_id%3Dnoaihdevm_6iyg0a8l0q%26redirect_uri%3Dhttps%253A%252F%252Fwww.crunchyroll.com%252Fcallback%26response_type%3Dcookie%26state%3D%252F",
+        "https://sso.crunchyroll.com/authorize?client_id=noaihdevm_6iyg0a8l0q&redirect_uri=https%3A%2F%2Fwww.crunchyroll.com%2Fcallback&response_type=cookie&state=%2F",
     )
     sb.type("input[name='email']", credentials["email"])
     sb.type("input[type='password']", credentials["password"])
     sb.click("button[data-t='login-button']", by="css selector")
+    screenshot.take(sb)
     # Save cookies
     if not is_homepage_loaded(sb):
         screenshot.take(sb)
         exit(code=1)
+    screenshot.take(sb)
     cookies = sb.driver.get_cookies()
     with open("crunchyroll_cookies.pkl", "wb") as f:
         pickle.dump(cookies, f)
