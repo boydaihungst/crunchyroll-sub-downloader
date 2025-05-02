@@ -48,7 +48,7 @@ def main():
                         sb.driver.add_cookie(cookie)
                 except Exception:
                     print("Invalid cookie, removing cookies")
-                    if os.path.exists("crunchyroll_cookies.pkl"):
+                    if os.path.exists(cookies_file):
                         os.remove("crunchyroll_cookies.pkl")
                     sb.driver.delete_all_cookies()
                 sb.driver.refresh()
