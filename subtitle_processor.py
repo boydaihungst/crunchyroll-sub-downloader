@@ -12,10 +12,10 @@ def remove_unused_styles(input_file, output_file, is_replace_font=False):
 
     used_styles = set(event.style for event in doc.events if isinstance(event, ass.Dialogue))
     doc.styles = [style for style in doc.styles if style.name in used_styles]
-    doc.info["PlayResX"] = "1920"
-    doc.info["PlayResY"] = "1080"
-    doc.info["ScaledBorderAndShadow"] = "Yes"
     if is_replace_font:
+        doc.info["PlayResX"] = "1920"
+        doc.info["PlayResY"] = "1080"
+        doc.info["ScaledBorderAndShadow"] = "Yes"
         for style in doc.styles:
             if style.name == "Default" and style.fontname == "Arial Unicode MS" and style.fontsize == 20:
                 style.fontname = "UVN Sach Vo"

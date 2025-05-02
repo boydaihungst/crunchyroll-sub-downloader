@@ -29,26 +29,41 @@ def init_files():
         f_tmp.close()
 
 
-with SB(uc=True) as sb:
-    init_files()
-    if os.path.exists("crunchyroll_cookies.pkl"):
-        sb.open("https://www.crunchyroll.com")
-        print("Checking cookies...")
-        # Load cookies
-        with open("crunchyroll_cookies.pkl", "rb") as f:
-            cookies = pickle.load(f)
+def main():
+    with SB(uc=True) as sb:
+        init_files()
 
-        for cookie in cookies:
-            sb.driver.add_cookie(cookie)
-        sb.driver.refresh()
-        if auth.is_logged_in(sb):
-            screenshot.take(sb)
-            print("Reusing old cookies")
-        else:
-            screenshot.take(sb)
-            print("Invalid cookies, logging in...")
-            auth.login(sb)
-    else:
-        print("No cookies, logging in...")
-        auth.login(sb)
-    animes.start_download_anime(sb)
+        while True:
+            if os.path.exists("crunchyroll_cookies.pkl"):
+                sb.open("https://www.crunchyroll.com")
+                print("Checking cookies...")
+                try:
+                    with open("crunchyroll_cookies.pkl", "rb") as f:
+                        cookies = pickle.load(f)
+
+                    for cookie in cookies:
+                        sb.driver.add_cookie(cookie)
+                except Exception:
+                    print("Invalid cookie, removing cookies")
+                    if os.path.exists("crunchyroll_cookies.pkl"):
+                        os.remove("crunchyroll_cookies.pkl")
+                sb.driver.refresh()
+                if auth.is_logged_in(sb):
+                    screenshot.take(sb)
+                    print("Reusing old cookies")
+                    break
+                else:
+                    screenshot.take(sb)
+                    print("Invalid cookies, logging in...")
+                    auth.login(sb)
+                    break
+            else:
+                print("No cookies, logging in...")
+                auth.login(sb)
+                break
+
+        animes.start_download_anime(sb)
+
+
+if __name__ == "__main__":
+    main()

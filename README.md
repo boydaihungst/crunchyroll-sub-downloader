@@ -1,5 +1,16 @@
 # Crunchyroll-sub-downloader
 
+<!--toc:start-->
+
+- [Crunchyroll-sub-downloader](#crunchyroll-sub-downloader)
+  - [Installation](#installation)
+    - [Requirements](#requirements)
+    - [Installation](#installation)
+  - [Usage](#usage)
+    - [Troubleshooting](#troubleshooting)
+  - [License](#license)
+  <!--toc:end-->
+
 Crunchyroll-sub-downloader is a Python script that downloads subtitles for anime from Crunchyroll using selenium.
 
 ## Installation
@@ -54,6 +65,14 @@ cp credentials.json.example credentials.json
 
 ```bash
 python3 main.py
+```
+
+### Troubleshooting
+
+If you encounter any issues, please use the following command to get the screenshot of the browser, then open an issue with output log and the screenshots attached (in `screenshots` folder).
+
+```bash
+DEBUG=true python3 main.py
 ```
 
 ## License
