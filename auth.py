@@ -100,6 +100,7 @@ def login(sb):
     # Save cookies
     if not is_homepage_loaded(sb):
         screenshot.take(sb)
+        print("Check this credentials.json or try again")
         exit(code=1)
     screenshot.take(sb)
     cookies = sb.driver.get_cookies()
