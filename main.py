@@ -1,4 +1,6 @@
 import glob
+import hashlib
+import json
 import os
 import pickle
 
@@ -34,11 +36,12 @@ def main():
         init_files()
 
         while True:
-            if os.path.exists("crunchyroll_cookies.pkl"):
+            cookies_file = auth.cookie_file_name()
+            if os.path.exists(cookies_file):
                 sb.open("https://www.crunchyroll.com")
                 print("Checking cookies...")
                 try:
-                    with open("crunchyroll_cookies.pkl", "rb") as f:
+                    with open(cookies_file, "rb") as f:
                         cookies = pickle.load(f)
 
                     for cookie in cookies:

@@ -1,5 +1,5 @@
 credentials.json
-crunchyroll_cookies.pkl
+*.pkl
 screenshots
 __pycache__
 .pytest_cache
