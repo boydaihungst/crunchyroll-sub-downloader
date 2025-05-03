@@ -30,6 +30,7 @@ def init_files():
 
 
 def main():
+    print("Opening browser...")
     with SB(uc=True) as sb:
         init_files()
         cookies_file = auth.cookie_file_name()

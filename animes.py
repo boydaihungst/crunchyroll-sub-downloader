@@ -18,6 +18,7 @@ def start_download_anime(sb):
     animes = json.load(f)
     list_downloaded = json.load(f2)
     for anime in animes:
+        print(f"--------------------------------------------------------------------------------")
         print(f"Checking anime URL: {anime['url']}")
         seasons = anime.get("seasons") or get_all_season_indexes(sb, anime.get("url")) or []
         anime["lang"] = anime.get("lang") or []
@@ -37,18 +38,18 @@ def handle_season(sb, series, season, list_downloaded):
     if not series.get("url") or int(season) < 1:
         return
     xv = [x for x in list_downloaded if x["url"] == series["url"] and x["season"] == season]
-    skip_urls = list(xv[0]["downloaded"]) if xv else list()
+    skip_episodes = list(xv[0]["downloaded"]) if xv else list()
     sb.open(series["url"])
 
     try:
-        print(f"Downloading for season number: {str(season)}")
+        print(f"Checking season number: {str(season)}")
         select_season_from_dropdown_list(sb, season)
         click_load_more_btn(sb)
         episode_urls = get_list_of_episode_urls(sb)
         total_episodes_episodes = len(episode_urls)
 
         print(f"Total number of episodes in season {season}: {str(total_episodes_episodes)}")
-        open_episode_url(sb, series, season, episode_urls, skip_urls)
+        open_episode_url(sb, series, season, episode_urls, skip_episodes)
     except:
         traceback.print_exc()
 
@@ -117,34 +118,38 @@ def select_season_from_dropdown_list(sb, season):
         return
 
 
-def open_episode_url(sb, anime, season, episodes_url=[], skip_urls=[]):
-    for episode_url in episodes_url:
+def open_episode_url(sb, anime, season, episodes_urls=[], skip_episodes=[]):
+    for episode_url in episodes_urls:
         languages_to_download = []
-        languages_to_skip = [item["lang"] for item in skip_urls if item["url"] == episode_url]
+        languages_to_skip = [ep["lang"] for ep in skip_episodes if ep["url"] == episode_url]
         for lang in anime["lang"]:
-            if any(item["url"] == episode_url and lang in item["lang"] for item in skip_urls):
+            if any(ep["url"] == episode_url and lang in ep["lang"] for ep in skip_episodes):
                 continue
             else:
                 languages_to_download.append(lang)
 
         if len(anime["lang"]) > 0 and len(languages_to_download) == 0:
             continue
-        print(f"Go to episode link: {str(episode_url)}")
+        print(f"Checking episode URL: {str(episode_url)}")
         go_to_episode_page(sb, episode_url)
         episode_metadata = get_episode_metadata(sb, season, episode_url)
         if episode_metadata is None:
             continue
         if len(episode_metadata["playService"]["subtitles"]) == 0:
             print("No subtitles found!")
-            log_downloaded_episode(anime, season, skip_urls)
+            log_downloaded_episode(anime, season, skip_episodes)
             go_back_to_ep_lists_page(sb, season)
             continue
         downloaded_subtitles = save_episode_subtitles(
             sb, season, episode_metadata, languages_to_download, languages_to_skip
         )
-        append_lang_to_skip_urls(skip_urls, episode_url, sorted(set(d["lang"] for d in downloaded_subtitles)))
-        log_downloaded_episode(anime, season, skip_urls)
-        print("Downloaded subtiles")
+        downloaded_subtitles_langs = sorted(set(d["lang"] for d in downloaded_subtitles))
+        append_lang_to_skip_urls(skip_episodes, episode_url, downloaded_subtitles_langs)
+        log_downloaded_episode(anime, season, skip_episodes)
+        if len(downloaded_subtitles) > 0:
+            print("Downloaded new subtiles: " + ", ".join(downloaded_subtitles_langs))
+        if len(languages_to_download) > 0 and len(languages_to_download) != len(downloaded_subtitles_langs):
+            print("Missing subtitles: " + ", ".join(d for d in languages_to_download if d not in downloaded_subtitles))
         go_back_to_ep_lists_page(sb, season)
 
 
@@ -225,7 +230,7 @@ def save_episode_subtitles(sb, season, tvshow_info, lang_to_download=[], downloa
     return subtitles
 
 
-def log_downloaded_episode(anime, season, downloaded_subtitles=[]):
+def log_downloaded_episode(anime, season, downloaded_episodes=[]):
     f = open(os.path.join("output", "saved_file.json"), "r+")
     data = json.load(f)
     data = [x for x in data if x["url"] != anime["url"] or x["season"] != season]
@@ -233,7 +238,7 @@ def log_downloaded_episode(anime, season, downloaded_subtitles=[]):
         {
             "url": anime["url"],
             "season": season,
-            "downloaded": downloaded_subtitles,
+            "downloaded": downloaded_episodes,
         }
     )
     f.seek(0)  # Move the file pointer to the beginning of the file
@@ -242,15 +247,15 @@ def log_downloaded_episode(anime, season, downloaded_subtitles=[]):
     f.close()
 
 
-def append_lang_to_skip_urls(skip_urls, episode_url, episode_langs):
-    for downloaded in skip_urls:
+def append_lang_to_skip_urls(skip_episodes, episode_url, episode_langs):
+    for downloaded in skip_episodes:
         if downloaded["url"] == episode_url:
             # Merge languages without duplicates
             downloaded["lang"] = list(set(downloaded["lang"] + episode_langs))
             return
 
     # If not found, add new entry
-    skip_urls.append({"url": episode_url, "lang": episode_langs})
+    skip_episodes.append({"url": episode_url, "lang": episode_langs})
 
 
 def get_list_of_episode_urls(sb):
