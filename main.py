@@ -31,7 +31,7 @@ def init_files():
 
 def main():
     print("Opening browser...")
-    with SB(uc=True) as sb:
+    with SB(uc=True, chromium_arg="--mute-audio") as sb:
         init_files()
         cookies_file = auth.cookie_file_name()
         if os.path.exists(cookies_file):
