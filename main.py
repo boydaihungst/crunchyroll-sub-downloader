@@ -33,7 +33,9 @@ def init_files():
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Crunchyroll subtitles downloader", formatter_class=argparse.RawTextHelpFormatter
+        usage="%(prog)s [url] [-h] [-l en-US vi-VN ...] [-s -1 1 2 ...] [-L NUMBER] [-f]",
+        description="Crunchyroll subtitles downloader",
+        formatter_class=argparse.RawTextHelpFormatter,
     )
     parser.add_argument("url", nargs="?", help="Crunchyroll episode or series URL")
     parser.add_argument(

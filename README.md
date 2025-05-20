@@ -85,7 +85,7 @@ Step 3: Activate the Virtual Environment (rerun this step every time you open a 
 > These `-l --lang -s --season -L --latest` arguments will override the corresponding arguments in `animes.json` file.
 
 ```bash
-usage: main.py [-h] [-l [LANG ...]] [-s [SEASON ...]] [-L LATEST] [-f] [url]
+usage: main.py [url] [-h] [-l en-US vi-VN ...] [-s -1 1 2 ...] [-L NUMBER] [-f]
 
 Crunchyroll subtitles downloader
 
