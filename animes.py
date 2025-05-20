@@ -50,15 +50,15 @@ def start_download_anime(
     if not single_url:
         f = open("animes.json")
         animes = json.load(f)
-    elif "/series/" in single_url:
+    elif any(url in single_url for url in ["/series/", "/watch/"]):
         animes.append({"url": single_url})
-    elif "/watch/" in single_url:
-        handle_single_episode(sb, single_url, lang, list_downloaded)
     else:
         print(f"Invalid Episode/Series URL: {single_url}")
         exit(code=1)
 
     for anime in animes:
+        if type(anime) == str:
+            anime = AttrDict({"url": anime})
         if lang:
             anime["lang"] = copy.deepcopy(lang)
         if seasons_override:
@@ -66,8 +66,6 @@ def start_download_anime(
         if get_latest_n_episodes:
             anime["latest"] = get_latest_n_episodes
 
-        if type(anime) == str:
-            anime = AttrDict({"url": anime})
         print(f"--------------------------------------------------------------------------------")
         if not anime.get("url"):
             print("Missing URL in animes.json")
