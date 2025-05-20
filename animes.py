@@ -369,7 +369,7 @@ def append_lang_to_skip_urls(skip_episodes, episode_url, episode_langs):
             return skip_episodes
 
     # If not found, add new entry
-    skip_episodes.append({"url": episode_url, "lang": list(set(downloaded["lang"]))})
+    skip_episodes.append({"url": episode_url, "lang": list(set(episode_langs))})
     return skip_episodes
 
 
