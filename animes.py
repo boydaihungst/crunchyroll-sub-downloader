@@ -60,7 +60,7 @@ def start_download_anime(
 
     for anime in animes:
         if lang:
-            anime["lang"] = lang
+            anime["lang"] = copy.deepcopy(lang)
         if seasons_override:
             anime["seasons"] = copy.deepcopy(seasons_override)
         if get_latest_n_episodes:
