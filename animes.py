@@ -3,7 +3,10 @@ import os
 import re
 import time
 import traceback
+from typing import Any, Optional
 from urllib.parse import urljoin, urlparse
+
+from seleniumbase import BaseCase
 
 import screenshot
 import subtitle_processor
@@ -11,20 +14,83 @@ import subtitle_processor
 new_downloaded_subtitles = {}
 
 
-def start_download_anime(sb):
+class AttrDict(dict):
+    def __getattr__(self, name: str) -> Any:
+        try:
+            return self[name]
+        except KeyError:
+            raise AttributeError(f"'AttrDict' object has no attribute '{name}'")
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        self[name] = value
+
+    def get(self, key: str, default: Optional[Any] = None) -> Any:
+        return super().get(key, default)
+
+    def set(self, key: str, value: Any) -> None:
+        self[key] = value
+
+
+def start_download_anime(
+    sb: BaseCase, single_url=None, lang=[], seasons=[], force_download=False, get_latest_n_episodes: None | int = None
+):
     print("Loading animes list")
-    f = open("animes.json")
     f2 = open(os.path.join("output", "saved_file.json"))
-    animes = json.load(f)
-    list_downloaded = json.load(f2)
+    if force_download:
+        list_downloaded = []
+    else:
+        list_downloaded = json.load(f2)
+    animes = []
+    if not single_url:
+        f = open("animes.json")
+        animes = json.load(f)
+    elif "/series/" in single_url:
+        animes.append({"url": single_url})
+    elif "/watch/" in single_url:
+        handle_single_episode(sb, single_url, lang, list_downloaded)
+    else:
+        print(f"Invalid Episode/Series URL: {single_url}")
+        exit(code=1)
+
     for anime in animes:
+        if lang:
+            anime["lang"] = lang
+        if seasons:
+            anime["seasons"] = seasons
+        if get_latest_n_episodes:
+            anime["latest"] = get_latest_n_episodes
+
+        if type(anime) == str:
+            anime = AttrDict({"url": anime})
         print(f"--------------------------------------------------------------------------------")
-        print(f"Checking anime URL: {anime['url']}")
-        seasons = anime.get("seasons") or get_all_season_indexes(sb, anime.get("url")) or []
+        if not anime.get("url"):
+            print("Missing URL in animes.json")
+            continue
+
         anime["lang"] = anime.get("lang") or []
-        for season in seasons:
-            handle_season(sb, anime, season, list_downloaded)
+        if "/series/" in anime.get("url"):
+            print(f"Checking Series URL: {anime['url']}")
+            if anime.get("seasons"):
+                seasons = anime.get("seasons") or []
+                for s in anime.get("seasons"):
+                    if s < 0:
+                        latest_season = True
+            if (not anime.get("seasons")) or latest_season:
+                sb.open(anime.get("url"))
+                seasons, _ = get_all_season_indexes(sb) or []
+                if latest_season:
+                    seasons = [seasons[-1]] if seasons else []
+
+            for season in seasons:
+                handle_season(sb, anime, season, list_downloaded)
+        elif "/watch/" in anime.get("url"):
+            print(f"Checking epsode URL: {anime.get('url')}")
+            handle_single_episode(sb, anime.get("url"), anime.get("lang"), list_downloaded)
+        else:
+            print(f"Invalid Epsode/Series URL: {anime.get('url')}")
+
     if new_downloaded_subtitles:
+        print(f"--------------------------------------------------------------------------------")
         print(f"New subtitles downloaded:")
         for key, value in new_downloaded_subtitles.items():
             print(f"    {key}:")
@@ -46,6 +112,8 @@ def handle_season(sb, series, season, list_downloaded):
         select_season_from_dropdown_list(sb, season)
         click_load_more_btn(sb)
         episode_urls = get_list_of_episode_urls(sb)
+        if series.get("latest") and episode_urls:
+            episode_urls = episode_urls[-series.get("latest"):]
         total_episodes_episodes = len(episode_urls)
 
         print(f"Total number of episodes in season {season}: {str(total_episodes_episodes)}")
@@ -54,41 +122,69 @@ def handle_season(sb, series, season, list_downloaded):
         traceback.print_exc()
 
 
-def get_all_season_indexes(sb, anime_url):
+def handle_single_episode(sb: BaseCase, episode_url, lang=[], list_downloaded=[]):
+    series = AttrDict()
+    series.lang = lang or []
+    sb.set_window_size(681, 793)
+
+    sb.open(episode_url)
+    series.url = get_series_url_from_watch_page(sb)
+    click_see_more_episodes_from_watch_page(sb)
+    _, season = get_all_season_indexes(sb)
+    close_see_more_episodes_in_watch_page(sb)
+    sb.set_window_size(1920, 1080)
+
+    if not season or season <= 0:
+        print("No seasons found")
+        return
+
+    xv = [x for x in list_downloaded if x["url"] == series["url"] and x["season"] == season]
+    skip_episodes = list(xv[0]["downloaded"]) if xv else list()
     try:
-        if not anime_url:
-            return []
-        sb.open(anime_url)
-        sb.wait_for_element("css selector", ".episode-list .erc-playable-collection", timeout=15)
+        open_episode_url(sb, series, season, [episode_url], skip_episodes, suppress_download_msg=True)
+    except:
+        traceback.print_exc()
+
+
+def get_all_season_indexes(sb: BaseCase) -> tuple[list, int]:
+    try:
+        sb.wait_for_element_present("css selector", ".episode-list .erc-playable-collection", timeout=15)
 
         if sb.is_element_present("css selector", ".season-info > h4 > span"):
             sb.click(".season-info", by="css selector")
-            sb.wait_for_element("css selector", "[class^='dropdown-content__children']", timeout=15)
-            season_count = len(
-                sb.driver.find_elements(
-                    "css selector", "[class^='dropdown-content__children'] div[class^='extended-option']"
-                )
+            sb.wait_for_element_present("css selector", "[class^='dropdown-content__children']", timeout=15)
+
+            list_season_el = sb.find_elements(
+                "css selector",
+                "[class^='dropdown-content__children'] div[class^='extended-option']",
             )
-            return list(range(1, season_count + 1))
+
+            for index, el in enumerate(list_season_el):
+                class_attr = el.get_attribute("class")
+                if class_attr and "extended-option--is-active" in class_attr:
+                    current_season_number = index + 1
+
+            season_count = len(list_season_el)
+            return list(range(1, season_count + 1)), current_season_number
         else:
-            return [1]
+            return [1], 1
+
     except Exception as e:
         print(f"Error: {e}")
         traceback.print_exc()
         screenshot.take(sb)
         # accept_consent(sb)
-    return []
+    return [], 0
 
 
 def click_load_more_btn(sb):
     try:
         while True:
-            sb.wait_for_element("css selector", "div.erc-season-episode-list", timeout=15)
+            sb.wait_for_element_present("css selector", "div.erc-season-episode-list", timeout=15)
 
             if sb.is_element_present("css selector", "[data-t='show-more-btn']"):
                 sb.click("[data-t='show-more-btn']", by="css selector")
-                # sb.wait(3)
-                sb.wait_for_element("css selector", "div.erc-season-episode-list", timeout=15)
+                sb.wait_for_element_present("css selector", "div.erc-season-episode-list", timeout=15)
             else:
                 sb.wait(1)
                 break
@@ -101,15 +197,15 @@ def click_load_more_btn(sb):
 
 def select_season_from_dropdown_list(sb, season):
     try:
-        sb.wait_for_element("css selector", ".episode-list .erc-playable-collection", timeout=15)
+        sb.wait_for_element_present("css selector", ".episode-list .erc-playable-collection", timeout=15)
         if sb.is_element_present("css selector", ".season-info > h4 > span"):
             sb.click(".season-info", by="css selector")
-            sb.wait_for_element("css selector", "[class^='dropdown-content__children']", timeout=15)
+            sb.wait_for_element_present("css selector", "[class^='dropdown-content__children']", timeout=15)
             sb.click(
                 "[class^='dropdown-content__children'] > div > div:nth-child(" + str(season) + ")",
                 by="css selector",
             )
-            sb.wait_for_element("css selector", ".erc-season-episode-list", timeout=15)
+            sb.wait_for_element_present("css selector", ".erc-season-episode-list", timeout=15)
     except Exception as e:
         print(f"Error: {e}")
         traceback.print_exc()
@@ -118,8 +214,8 @@ def select_season_from_dropdown_list(sb, season):
         return
 
 
-def open_episode_url(sb, anime, season, episodes_urls=[], skip_episodes=[]):
-    for episode_url in episodes_urls:
+def open_episode_url(sb, anime, season, episodes_urls=[], skip_episodes=[], suppress_download_msg=False):
+    for index, episode_url in enumerate(episodes_urls):
         languages_to_download = []
         languages_to_skip = [ep["lang"] for ep in skip_episodes if ep["url"] == episode_url]
         for lang in anime["lang"]:
@@ -130,8 +226,10 @@ def open_episode_url(sb, anime, season, episodes_urls=[], skip_episodes=[]):
 
         if len(anime["lang"]) > 0 and len(languages_to_download) == 0:
             continue
-        print(f"Checking episode URL: {str(episode_url)}")
-        go_to_episode_page(sb, episode_url)
+        if not suppress_download_msg:
+            print(f"Checking episode URL: {str(episode_url)}")
+        if sb.driver.current_url != episode_url:
+            go_to_episode_page(sb, episode_url)
         episode_metadata = get_episode_metadata(sb, season, episode_url)
         if episode_metadata is None:
             continue
@@ -153,19 +251,27 @@ def open_episode_url(sb, anime, season, episodes_urls=[], skip_episodes=[]):
         go_back_to_ep_lists_page(sb, season)
 
 
-def get_episode_metadata(sb, season, episode_url, attempts=3):
+def get_episode_metadata(sb: BaseCase, season, episode_url, attempts=3):
     if attempts == 0:
+        print("Error getting episode metadata")
         return
     try:
-        sb.driver.uc_switch_to_frame("iframe")
-        sb.wait_for_element("css selector", "video", timeout=15)
+        iframe = sb.wait_for_element_present("css selector", "iframe.video-player", timeout=15)
+        sb.driver.switch_to.frame(iframe)
 
         if wait_for_video_to_play(sb, "video", timeout=15):
             screenshot.take(sb)
-            return json.loads(sb.execute_script("return JSON.stringify(self.v1config.media)"))
+            metadata = json.loads(sb.execute_script("return JSON.stringify(self.v1config.media)"))
+            sb.driver.switch_to.default_content()
+            return metadata
         screenshot.take(sb)
+        sb.driver.switch_to.default_content()
     except:
-        print("Error getting episode metadata")
+        print("Error getting episode metadata, Retrying...")
+        iframe = sb.wait_for_element_present("css selector", "iframe.video-player", timeout=15)
+        sb.driver.switch_to.frame(iframe)
+        stop_video_play(sb)
+        sb.driver.switch_to.default_content()
         slowdown_if_restrictions_overlay(sb)
         go_back_to_ep_lists_page(sb, season)
         go_to_episode_page(sb, episode_url)
@@ -260,7 +366,7 @@ def append_lang_to_skip_urls(skip_episodes, episode_url, episode_langs):
 
 def get_list_of_episode_urls(sb):
     print("Getting list of episode")
-    element = sb.wait_for_element("css selector", ".episode-list .erc-playable-collection", timeout=15)
+    element = sb.wait_for_element_present("css selector", ".episode-list .erc-playable-collection", timeout=15)
     base_url = sb.get_current_url()
     if element:
         return [
@@ -276,8 +382,9 @@ def get_list_of_episode_urls(sb):
     # return sb.execute_script("return document.querySelectorAll('.card').length")
 
 
-def wait_for_video_to_play(sb, selector="video", timeout=15):
+def wait_for_video_to_play(sb: BaseCase, selector="video", timeout=15):
     start = time.time()
+    sb.wait_for_element_present("css selector", selector, timeout)
     while time.time() - start < timeout:
         is_playing = sb.execute_script(
             f"""
@@ -296,14 +403,42 @@ def wait_for_video_to_play(sb, selector="video", timeout=15):
             }}
         """
         )
-        sb.wait(1)
+
+        sb.wait(2)
     print("Video did not start playing in time")
+    return False
+
+
+def stop_video_play(sb, selector="video", timeout=15):
+    start = time.time()
+    sb.wait_for_element_present("css selector", selector, timeout)
+    while time.time() - start < timeout:
+        is_playing = sb.execute_script(
+            f"""
+            var video = document.querySelector("{selector}");
+            return video && !video.paused && !video.ended && video.readyState > 2;
+        """
+        )
+        if not is_playing:
+            return True
+        sb.execute_script(
+            f"""
+            var video = document.querySelector("{selector}");
+            if (video) {{
+                video.muted = true;
+                video.pause()
+                video.currentTime = 0;
+            }}
+        """
+        )
+        sb.wait(2)
+    print("Video did not pause in time")
     return False
 
 
 def go_to_episode_page(sb, episode_url):
     try:
-        sb.wait_for_element(
+        sb.wait_for_element_present(
             "css selector",
             ".episode-list .erc-playable-collection .card a[href='" + urlparse(episode_url).path + "']",
             timeout=15,
@@ -315,7 +450,7 @@ def go_to_episode_page(sb, episode_url):
         )
         screenshot.take(sb)
         # accept_consent(sb)
-        sb.wait_for_element("css selector", "iframe.video-player", timeout=15)
+        sb.wait_for_element_present("css selector", "iframe.video-player", timeout=15)
         screenshot.take(sb)
         sb.wait(1)
     except Exception as e:
@@ -324,18 +459,55 @@ def go_to_episode_page(sb, episode_url):
         screenshot.take(sb)
 
 
-def slowdown_if_restrictions_overlay(sb):
+def slowdown_if_restrictions_overlay(sb: BaseCase):
     if sb.is_element_present("css selector", "#restrictionsOverlay"):
-        cooldown = 60
+        cooldown = 30
         print(f"Restrictions overlay detected, waiting {cooldown}s")
         sb.wait(cooldown)
+        slowdown_if_restrictions_overlay(sb)
 
 
-def go_back_to_ep_lists_page(sb, season):
+def go_back_to_ep_lists_page(sb: BaseCase, season):
     try:
-        sb.go_back()
+        if sb.is_element_clickable("css selector", 'a[data-t="show-title-link"]'):
+            sb.click("a.show-title-link", by="css selector")
+            print("Going back to previous page")
+        else:
+            sb.go_back()
         select_season_from_dropdown_list(sb, season)
         click_load_more_btn(sb)
+    except Exception as e:
+        sb.driver.switch_to.default_content()
+        print(f"Error: {e}")
+        traceback.print_exc()
+        screenshot.take(sb)
+
+
+def get_series_url_from_watch_page(sb: BaseCase):
+    try:
+        if "/watch/" in sb.driver.current_url:
+            meta_tag_el = sb.wait_for_element_present("css selector", 'meta[property="video:series"]', timeout=15)
+            return meta_tag_el.get_attribute("content")
+    except Exception as e:
+        print(f"Error: {e}")
+        traceback.print_exc()
+        screenshot.take(sb)
+
+
+def click_see_more_episodes_from_watch_page(sb: BaseCase):
+    try:
+        if sb.is_element_present("css selector", 'button[data-t="see-more-episodes-btn"]'):
+            sb.click('button[data-t="see-more-episodes-btn"]', by="css selector")
+    except Exception as e:
+        print(f"Error: {e}")
+        traceback.print_exc()
+        screenshot.take(sb)
+
+
+def close_see_more_episodes_in_watch_page(sb: BaseCase):
+    try:
+        if sb.is_element_present("css selector", 'button[class^="modal-portal__close-button"]'):
+            sb.click('button[class^="modal-portal__close-button"]', by="css selector")
     except Exception as e:
         print(f"Error: {e}")
         traceback.print_exc()
@@ -347,6 +519,12 @@ def add_new_downloaded_subtitle(key, value):
     if key not in new_downloaded_subtitles:
         new_downloaded_subtitles[key] = []
     new_downloaded_subtitles[key].append(value)
+
+
+def get_console_logs(sb):
+    logs = sb.driver.get_log("browser")
+    for entry in logs:
+        print(f"[{entry['level']}] {entry['message']}")
 
 
 # def accept_consent(sb):
