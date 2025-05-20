@@ -5,8 +5,12 @@
 - [Crunchyroll-sub-downloader](#crunchyroll-sub-downloader)
   - [Installation](#installation)
     - [Requirements](#requirements)
-    - [Installation](#installation)
+    - [Clone the repository](#clone-the-repository)
+    - [Setup python environment for Windows](#setup-python-environment-for-windows)
+    - [Setup python environment for Unix-based systems](#setup-python-environment-for-unix-based-systems)
   - [Usage](#usage)
+    - [Batch download using command line arguments](#batch-download-using-command-line-arguments)
+    - [Batch download using only animes.json file](#batch-download-using-only-animesjson-file)
     - [Troubleshooting](#troubleshooting)
   - [License](#license)
   <!--toc:end-->
@@ -21,7 +25,7 @@ Crunchyroll-sub-downloader is a Python script that downloads subtitles for anime
 - pip
 - git
 
-### Installation
+### Clone the repository
 
 ```bash
 git clone https://github.com/boydaihungst/crunchyroll-sub-downloader.git
@@ -151,19 +155,18 @@ For example:
 
 - Add crunchyroll premium account and password in `credentials.json` file.
 - Change `seasons`, `langs`, `url` in `animes.json`, then run the command below.
-- The `url` could be either the anime URL (`/series/`) or the episode URL (`/watch/`). For the episode `seasons` are not needed and will be ignored.
 - You can also download subtitles for specific languages, season numbers and the n number of latest episodes by adding them to the `lang`, `seasons` and `lastest` in animes.json.
 
-  - The `url` supports both anime and episode URL.
+  - The `url` could be either the anime URL (`/series/`) or the episode URL (`/watch/`). For the episode `seasons` are not needed and will be ignored.
   - Season numbers start from 1 and go up to n, as listed in the season drop-down menu on the Crunchyroll website. Season numbers can be set to `-1` to get the latest season.
-  - If not specified, the script will download subtitles for all languages and all seasons.
+  - If `season` and `lang` are not specified, it will download subtitles for all seasons and languages.
 
-  - Get only the latest n number of an episode by setting `latest` to `n` number in animes.json. `"latest" = 1` and "seasons" = [-1]` will download subtitles for the newest episode of the latest season.
+  - Get only the latest n number of an episode by setting `latest` to `n` number in animes.json. `"latest" = 1` and `"seasons" = [-1]` will download subtitles for the newest episode of the latest season.
 
 - Some popular language codes:
 
-  - "vi-VN", "en-US", "th-TH", "id-ID", "ms-MY", "ja-JP", "ru-RU", "pt-BR", "it-IT", "fr-FR", "es-ES", "es-419", "de-DE", "ar-SA"
-  - If you want to download subtitles for a language that is not listed, you can get rid of `lang` in animes.json to download subtitles for all languages -> to get the language code.
+  - `"vi-VN", "en-US", "th-TH", "id-ID", "ms-MY", "ja-JP", "ru-RU", "pt-BR", "it-IT", "fr-FR", "es-ES", "es-419", "de-DE", "ar-SA"`
+  - If you want to download subtitles for a language that is not listed, you can get rid of `lang` in animes.json to download subtitles for all languages, so you can get the language code.
 
 - Structure of animes.josn file :
 
@@ -216,10 +219,10 @@ After editing the `animes.json` file, run command:
 
 - Using default arguments in `animes.json` file:
 
-```bash
-  # Get all episodes of all seasons for all languages
-  python3 main.py
-```
+  ```bash
+    # Get all episodes of all seasons for all languages
+    python3 main.py
+  ```
 
 - Download using `animes.json` file, but override the `seasons`, `lang`, `latest`:
 
