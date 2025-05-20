@@ -1,3 +1,4 @@
+import copy
 import json
 import os
 import re
@@ -32,7 +33,12 @@ class AttrDict(dict):
 
 
 def start_download_anime(
-    sb: BaseCase, single_url=None, lang=[], seasons=[], force_download=False, get_latest_n_episodes: None | int = None
+    sb: BaseCase,
+    single_url=None,
+    lang=[],
+    seasons_override=[],
+    force_download=False,
+    get_latest_n_episodes: None | int = None,
 ):
     print("Loading animes list")
     f2 = open(os.path.join("output", "saved_file.json"))
@@ -55,8 +61,8 @@ def start_download_anime(
     for anime in animes:
         if lang:
             anime["lang"] = lang
-        if seasons:
-            anime["seasons"] = seasons
+        if seasons_override:
+            anime["seasons"] = copy.deepcopy(seasons_override)
         if get_latest_n_episodes:
             anime["latest"] = get_latest_n_episodes
 
@@ -70,19 +76,20 @@ def start_download_anime(
         anime["lang"] = anime.get("lang") or []
         if "/series/" in anime.get("url"):
             print(f"Checking Series URL: {anime['url']}")
+            anime["seasons"] = anime.get("seasons") or []
             latest_season = False
             if anime.get("seasons"):
-                seasons = anime.get("seasons") or []
                 for s in anime.get("seasons"):
                     if s < 0:
                         latest_season = True
+                        break
             if (not anime.get("seasons")) or latest_season:
                 sb.open(anime.get("url"))
-                seasons, _ = get_all_season_indexes(sb) or []
+                anime["seasons"], _ = get_all_season_indexes(sb) or []
                 if latest_season:
-                    seasons = [seasons[-1]] if seasons else []
+                    anime["seasons"] = [anime["seasons"][-1]] if anime["seasons"] else []
 
-            for season in seasons:
+            for season in anime["seasons"]:
                 handle_season(sb, anime, season, list_downloaded)
         elif "/watch/" in anime.get("url"):
             print(f"Checking epsode URL: {anime.get('url')}")
@@ -114,7 +121,7 @@ def handle_season(sb, series, season, list_downloaded):
         click_load_more_btn(sb)
         episode_urls = get_list_of_episode_urls(sb)
         if series.get("latest") and episode_urls:
-            episode_urls = episode_urls[-series.get("latest"):]
+            episode_urls = episode_urls[-series.get("latest") :]
         total_episodes_episodes = len(episode_urls)
 
         print(f"Total number of episodes in season {season}: {str(total_episodes_episodes)}")
