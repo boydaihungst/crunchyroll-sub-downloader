@@ -171,6 +171,7 @@ For example:
 - Structure of animes.josn file :
 
   ```json
+  [
     "https://www.crunchyroll.com/series/GVDHX85EQ/catch-me-at-the-ballpark", --> URL of the anime. This will download subtitles for all languages and seasons.
     "https://www.crunchyroll.com/watch/G8WU7V02K/way-of-the-flash", --> URL of the episode. This will download subtitles for a single languages and seasons.
 
@@ -213,6 +214,7 @@ For example:
       "latest": 3,
       "url": "https://www.crunchyroll.com/series/GVDHX85EQ/catch-me-at-the-ballpark"
     }
+  ]
   ```
 
 After editing the `animes.json` file, run command:
