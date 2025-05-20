@@ -70,6 +70,7 @@ def start_download_anime(
         anime["lang"] = anime.get("lang") or []
         if "/series/" in anime.get("url"):
             print(f"Checking Series URL: {anime['url']}")
+            latest_season = False
             if anime.get("seasons"):
                 seasons = anime.get("seasons") or []
                 for s in anime.get("seasons"):
