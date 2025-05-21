@@ -96,15 +96,19 @@ def start_download_anime(
         else:
             print(f"Invalid Epsode/Series URL: {anime.get('url')}")
 
-    if new_downloaded_subtitles:
-        print(f"--------------------------------------------------------------------------------")
-        print(f"New subtitles downloaded:")
-        for key, value in new_downloaded_subtitles.items():
-            print(f"    {key}:")
-            for v in value:
-                print(f"        {v}")
-    else:
-        print("No new subtitles.")
+    with open(os.path.join("output", "latest_downloaded.txt"), "w") as f3:
+        if new_downloaded_subtitles:
+            print(f"--------------------------------------------------------------------------------")
+            print(f"New subtitles downloaded:")
+            for key, value in new_downloaded_subtitles.items():
+                print(f"    {key}:")
+                f3.write(f"    {key}:")
+                for v in value:
+                    f3.write(f"        {v}")
+                    print(f"        {v}")
+        else:
+            print("No new subtitles.")
+            f3.write("No new subtitles.")
 
 
 def handle_season(sb, series, season, list_downloaded):
@@ -225,7 +229,7 @@ def open_episode_url(sb, anime, season, episodes_urls=[], skip_episodes=[], supp
     for index, episode_url in enumerate(episodes_urls):
 
         languages_to_download = []
-        languages_to_skip =  next((ep["lang"] for ep in skip_episodes if ep["url"] == episode_url), [])
+        languages_to_skip = next((ep["lang"] for ep in skip_episodes if ep["url"] == episode_url), [])
         for lang in anime["lang"]:
             if any(ep["url"] == episode_url and lang in ep["lang"] for ep in skip_episodes):
                 continue
