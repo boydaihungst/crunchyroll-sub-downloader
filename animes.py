@@ -100,15 +100,16 @@ def start_download_anime(
         if new_downloaded_subtitles:
             print(f"--------------------------------------------------------------------------------")
             print(f"New subtitles downloaded:")
+            f3.write(f"New subtitles downloaded:\n")
             for key, value in new_downloaded_subtitles.items():
                 print(f"    {key}:")
-                f3.write(f"    {key}:")
+                f3.write(f"    {key}:\n")
                 for v in value:
-                    f3.write(f"        {v}")
+                    f3.write(f"        {v}\n")
                     print(f"        {v}")
         else:
             print("No new subtitles.")
-            f3.write("No new subtitles.")
+            f3.write("No new subtitles.\n")
 
 
 def handle_season(sb, series, season, list_downloaded):
