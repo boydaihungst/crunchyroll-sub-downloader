@@ -43,9 +43,8 @@ def start_download_anime(
     print("Loading animes list")
 
     list_downloaded = []
-    if not force_download:
-        with open(os.path.join("output", "saved_file.json"), "r") as f2:
-            list_downloaded = json.load(f2)
+    with open(os.path.join("output", "saved_file.json"), "r") as f2:
+        list_downloaded = json.load(f2)
 
     animes = []
     if not single_url:
@@ -89,10 +88,10 @@ def start_download_anime(
                     anime["seasons"] = [anime["seasons"][-1]] if anime["seasons"] else []
 
             for season in anime["seasons"]:
-                handle_season(sb, anime, season, list_downloaded)
+                handle_season(sb, anime, season, list_downloaded, force_download)
         elif "/watch/" in anime.get("url"):
             print(f"Checking epsode URL: {anime.get('url')}")
-            handle_single_episode(sb, anime.get("url"), anime.get("lang"), list_downloaded)
+            handle_single_episode(sb, anime.get("url"), anime.get("lang"), list_downloaded, force_download)
         else:
             print(f"Invalid Epsode/Series URL: {anime.get('url')}")
 
@@ -112,7 +111,7 @@ def start_download_anime(
             f3.write("No new subtitles.\n")
 
 
-def handle_season(sb, series, season, list_downloaded):
+def handle_season(sb, series, season, list_downloaded, force_download=False):
     if not series.get("url") or int(season) < 1:
         return
     xv = [x for x in list_downloaded if x["url"] == series["url"] and int(x["season"]) == int(season)]
@@ -129,12 +128,12 @@ def handle_season(sb, series, season, list_downloaded):
         total_episodes_episodes = len(episode_urls)
 
         print(f"Total number of episodes in season {season}: {str(total_episodes_episodes)}")
-        open_episode_url(sb, series, season, episode_urls, skip_episodes)
+        open_episode_url(sb, series, season, episode_urls, skip_episodes, force_download=force_download)
     except:
         traceback.print_exc()
 
 
-def handle_single_episode(sb: BaseCase, episode_url, lang=[], list_downloaded=[]):
+def handle_single_episode(sb: BaseCase, episode_url, lang=[], list_downloaded=[], force_download=False):
     series = AttrDict()
     series.lang = lang or []
     sb.set_window_size(681, 793)
@@ -153,7 +152,9 @@ def handle_single_episode(sb: BaseCase, episode_url, lang=[], list_downloaded=[]
     xv = [x for x in list_downloaded if x["url"] == series["url"] and x["season"] == season]
     skip_episodes = list(xv[0]["downloaded"]) if xv else list()
     try:
-        open_episode_url(sb, series, season, [episode_url], skip_episodes, suppress_download_msg=True)
+        open_episode_url(
+            sb, series, season, [episode_url], skip_episodes, suppress_download_msg=True, force_download=force_download
+        )
     except:
         traceback.print_exc()
 
@@ -226,13 +227,23 @@ def select_season_from_dropdown_list(sb, season):
         return
 
 
-def open_episode_url(sb, anime, season, episodes_urls=[], skip_episodes=[], suppress_download_msg=False):
+def open_episode_url(
+    sb,
+    anime,
+    season,
+    episodes_urls=[],
+    skip_episodes=[],
+    suppress_download_msg=False,
+    force_download=False,
+):
     for index, episode_url in enumerate(episodes_urls):
 
         languages_to_download = []
-        languages_to_skip = next((ep["lang"] for ep in skip_episodes if ep["url"] == episode_url), [])
+        languages_to_skip = (
+            next((ep["lang"] for ep in skip_episodes if ep["url"] == episode_url), []) if not force_download else []
+        )
         for lang in anime["lang"]:
-            if any(ep["url"] == episode_url and lang in ep["lang"] for ep in skip_episodes):
+            if not force_download and any(ep["url"] == episode_url and lang in ep["lang"] for ep in skip_episodes):
                 continue
             else:
                 languages_to_download.append(lang)
