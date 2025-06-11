@@ -30,8 +30,8 @@ Crunchyroll-sub-downloader is a Python script that downloads subtitles for anime
 ```bash
 git clone https://github.com/boydaihungst/crunchyroll-sub-downloader.git
 cd crunchyroll-sub-downloader
-pip install -r requirements.txt
 cp credentials.json.example credentials.json
+cp animes.json.example animes.json
 ```
 
 ### Setup python environment for Windows
