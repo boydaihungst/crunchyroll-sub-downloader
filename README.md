@@ -74,6 +74,8 @@ Step 3: Activate the Virtual Environment (rerun this step every time you open a 
 . .venv/bin/activate
 ```
 
+Step 4: Install python libraies: `pip install -r requirements.txt`
+
 ## Usage
 
 ### Batch download using command line arguments
