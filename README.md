@@ -170,7 +170,7 @@ For example:
   - `"vi-VN", "en-US", "th-TH", "id-ID", "ms-MY", "ja-JP", "ru-RU", "pt-BR", "it-IT", "fr-FR", "es-ES", "es-419", "de-DE", "ar-SA"`
   - If you want to download subtitles for a language that is not listed, you can get rid of `lang` in animes.json to download subtitles for all languages, so you can get the language code.
 
-- Structure of animes.josn file :
+- Structure of animes.json file (Ignore the comment part before using `--> ...`) :
 
   ```json
   [
@@ -224,7 +224,6 @@ After editing the `animes.json` file, run command:
 - Using default arguments in `animes.json` file:
 
   ```bash
-    # Get all episodes of all seasons for all languages
     python3 main.py
   ```
 
