@@ -163,7 +163,7 @@ def get_all_season_indexes(sb: BaseCase) -> tuple[list, int]:
     try:
         sb.wait_for_element_present("css selector", ".episode-list .erc-playable-collection", timeout=15)
 
-        if sb.is_element_present("css selector", ".season-info > h4 > span"):
+        if sb.is_element_present("css selector", ".season-info"):
             sb.click(".season-info", by="css selector")
             sb.wait_for_element_present("css selector", "[class^='dropdown-content__children']", timeout=15)
 
