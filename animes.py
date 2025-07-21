@@ -120,7 +120,9 @@ def handle_season(sb, series, season, list_downloaded, force_download=False):
 
     try:
         print(f"Checking season number: {str(season)}")
-        select_season_from_dropdown_list(sb, season)
+        season = select_season_from_dropdown_list(sb, season)
+        if not season:
+            return
         click_load_more_btn(sb)
         episode_urls = get_list_of_episode_urls(sb)
         if series.get("latest") and episode_urls:
@@ -219,6 +221,11 @@ def select_season_from_dropdown_list(sb, season):
                 by="css selector",
             )
             sb.wait_for_element_present("css selector", ".erc-season-episode-list", timeout=15)
+            return season
+        else:
+            if season != 1:
+                print("Invalid season number, fallback to season 1")
+            return 1
     except Exception as e:
         print(f"Error: {e}")
         traceback.print_exc()
@@ -499,7 +506,9 @@ def go_back_to_ep_lists_page(sb: BaseCase, season):
             print("Going back to previous page")
         else:
             sb.go_back()
-        select_season_from_dropdown_list(sb, season)
+        season = select_season_from_dropdown_list(sb, season)
+        if not season:
+            return
         click_load_more_btn(sb)
     except Exception as e:
         sb.driver.switch_to.default_content()
