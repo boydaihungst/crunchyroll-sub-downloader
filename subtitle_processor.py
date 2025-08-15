@@ -6,10 +6,12 @@ import ass
 import ass.data
 
 
-def remove_unused_styles(input_file, output_file, is_replace_font=False):
-    with open(input_file, "r", encoding="utf-8-sig") as f:
-        doc = ass.parse(f)
+def remove_embedded_fonts(doc: ass.Document):
+    if "Fonts" in doc.sections:
+        del doc.sections["Fonts"]
 
+
+def remove_unused_styles(doc: ass.Document, is_replace_font=False):
     used_styles = set(event.style for event in doc.events if isinstance(event, ass.Dialogue))
     doc.styles = [style for style in doc.styles if style.name in used_styles]
     if is_replace_font:
@@ -160,6 +162,13 @@ def remove_unused_styles(input_file, output_file, is_replace_font=False):
                 style.margin_r = 60
                 style.margin_v = 50
                 style.encoding = 1
+
+
+def clean_subtitle(input_file, output_file, is_replace_font=False):
+    with open(input_file, "r", encoding="utf-8-sig") as f:
+        doc = ass.parse(f)
+    remove_embedded_fonts(doc)
+    remove_unused_styles(doc, is_replace_font)
     with open(output_file, "w", encoding="utf-8-sig") as f:
         doc.dump_file(f)
 
@@ -168,7 +177,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Remove unused styles from an .ass subtitle file or all .ass files in a directory."
     )
-    parser.add_argument("input", help="Path to the input .ass file or directory containing .ass files.")
+
+    parser.add_argument(
+        "inputs",
+        nargs="+",  # Accept one or more input paths
+        help="Path(s) to input .ass file(s) or directories containing .ass files.",
+    )
     parser.add_argument(
         "-o",
         "--output",
@@ -186,16 +200,25 @@ if __name__ == "__main__":
     args = parser.parse_args()
     replace_font = args.replace_font
 
-    if os.path.isdir(args.input):
-        input_dir = args.input
-
-        for file_path in glob.glob(os.path.join(input_dir, "**", "*.ass"), recursive=True):
-            output_dir = args.output if args.output else os.path.dirname(file_path)
-            os.makedirs(output_dir, exist_ok=True)
-            filename = os.path.basename(file_path)
-            output_path = os.path.join(output_dir, filename)
-            remove_unused_styles(file_path, output_path, is_replace_font=replace_font)
-    else:
-        input_path = args.input
-        output_path = args.output if args.output else input_path
-        remove_unused_styles(input_path, output_path, is_replace_font=replace_font)
+    for input_path in args.inputs:
+        if os.path.isdir(input_path):
+            # Input is a directory: process all .ass files recursively
+            for file_path in glob.glob(os.path.join(input_path, "**", "*.ass"), recursive=True):
+                output_dir = args.output if args.output else os.path.dirname(file_path)
+                os.makedirs(output_dir, exist_ok=True)
+                filename = os.path.basename(file_path)
+                output_path = os.path.join(output_dir, filename)
+                clean_subtitle(file_path, output_path, is_replace_font=replace_font)
+        elif os.path.isfile(input_path):
+            # Input is a single file
+            if args.output:
+                # If multiple inputs but single output is provided, treat output as directory
+                output_dir = args.output
+                os.makedirs(output_dir, exist_ok=True)
+                filename = os.path.basename(input_path)
+                output_path = os.path.join(output_dir, filename)
+            else:
+                output_path = input_path
+            clean_subtitle(input_path, output_path, is_replace_font=replace_font)
+        else:
+            print(f"Warning: {input_path} does not exist, skipping...")

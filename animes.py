@@ -357,9 +357,9 @@ def save_episode_subtitles(sb, season, tvshow_info, lang_to_download=[], downloa
             }
         )
         if list_subtitle_from_crunchyroll[subtitle]["language"] == "vi-VN":
-            subtitle_processor.remove_unused_styles(output, output, is_replace_font=True)
+            subtitle_processor.clean_subtitle(output, output, is_replace_font=True)
         else:
-            subtitle_processor.remove_unused_styles(output, output, is_replace_font=False)
+            subtitle_processor.clean_subtitle(output, output, is_replace_font=False)
         add_new_downloaded_subtitle(
             tvshow_info["metadata"]["series_title"],
             f"S{str(season)}E{tvshow_info["metadata"]["display_episode_number"]} ({list_subtitle_from_crunchyroll[subtitle]["language"]}): {tvshow_info["metadata"]["title"]}",
