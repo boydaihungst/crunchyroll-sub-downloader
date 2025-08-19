@@ -80,7 +80,7 @@ Step 4: Install python libraies: `pip install -r requirements.txt`
 
 ### Batch download using command line arguments
 
-- Add crunchyroll premium account and password in `credentials.json` file.
+- Add crunchyroll premium account and password in `credentials.json` file. After first successful login/run, the cookies will be saved in `crunchyroll_cookies_*.pkl` file, now you can remove password from `credentials.json` file, but keep email.
 
 > [!IMPORTANT]
 > All of the arguments are optional even the `url` argument.
@@ -155,7 +155,7 @@ For example:
 
 ### Batch download using only animes.json file
 
-- Add crunchyroll premium account and password in `credentials.json` file.
+- Add crunchyroll premium account and password in `credentials.json` file. After first successful login/run, the cookies will be saved in `crunchyroll_cookies_*.pkl` file, now you can remove password from `credentials.json` file, but keep email.
 - Change `seasons`, `langs`, `url` in `animes.json`, then run the command below.
 - You can also download subtitles for specific languages, season numbers and the n number of latest episodes by adding them to the `lang`, `seasons` and `lastest` in animes.json.
 
