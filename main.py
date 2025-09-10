@@ -115,7 +115,18 @@ def parse_args():
 def main():
     url, lang, seasons, force, get_latest_n_episodes = parse_args()
     print("Opening browser...")
-    with SB(uc=True, chromium_arg="--mute-audio --headless=new", headless=True) as sb:
+    with SB(
+        uc=True,
+        headless=True,
+        chromium_arg=(
+            "--headless=new "  # use new headless mode
+            "--mute-audio "  # optional: mute audio
+            "--window-size=1920,1080 "  # important for proper rendering
+            "--disable-gpu "  # improves stability in headless
+            "--disable-dev-shm-usage "  # fixes some Linux crashes
+            "--no-sandbox"  # required in some Linux environments
+        ),
+    ) as sb:
         init_files()
         cookies_file = auth.cookie_file_name()
         if os.path.exists(cookies_file):

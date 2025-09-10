@@ -3,17 +3,19 @@ import json
 import pickle
 import time
 
+from seleniumbase import BaseCase
+
 import screenshot
 
 
-def open_the_form_turnstile_page(sb, url):
+def open_the_form_turnstile_page(sb: BaseCase, url):
     sb.driver.uc_open_with_reconnect(
         url,
         reconnect_time=2.7,
     )
 
 
-def click_turnstile_and_verify(sb):
+def click_turnstile_and_verify(sb: BaseCase):
     sb.scroll_to_bottom()
     sb.driver.uc_switch_to_frame("iframe")
     sb.driver.uc_click("span.mark")
@@ -28,32 +30,32 @@ def try_bypass_turnstile(sb, url):
         open_the_form_turnstile_page(sb, url)
 
 
-def is_logged_in(sb):
+def is_logged_in(sb: BaseCase):
     if not is_homepage_loaded(sb):
         screenshot.take(sb)
         exit(code=1)
 
     try:
-        sb.wait_for_element("css selector", ".header-actions .user-actions-item", timeout=10)
-        return sb.is_element_present("css selector", "div[class^='erc-authenticated-user']")
+        sb.wait_for_element(by="css selector", selector=".header-actions .user-actions-item", timeout=10)
+        return sb.is_element_present(by="css selector", selector="div[class^='erc-authenticated-user']")
     except:
         screenshot.take(sb)
-        return sb.is_element_present("css selector", "div[class^='erc-authenticated-user']")
+        return sb.is_element_present(by="css selector", selector="div[class^='erc-authenticated-user']")
 
 
-def select_profile(sb):
-    is_profile_select_page = sb.is_element_present("css selector", "img[data-t='profile-avatar']")
+def select_profile(sb: BaseCase):
+    is_profile_select_page = sb.is_element_present(by="css selector", selector="img[data-t='profile-avatar']")
     if is_profile_select_page:
-        sb.click("img[data-t='profile-avatar']", by="css selector")
+        sb.click(selector="img[data-t='profile-avatar']", by="css selector")
         is_homepage_loaded(sb)
         return True
 
 
-def is_homepage_loaded(sb, selector=".shell-body", timeout=15):
+def is_homepage_loaded(sb: BaseCase, selector=".shell-body", timeout=15):
     start = time.time()
     while time.time() - start < timeout:
-        is_loading = sb.is_element_present("css selector", selector)
-        if is_loading or "sso.crunchyroll.com" in sb.driver.current_url:
+        is_loading = sb.is_element_present(by="css selector", selector=selector)
+        if is_loading or "sso.crunchyroll.com" in sb.get_current_url():
             sb.wait(1)
             continue
         select_profile(sb)
@@ -87,15 +89,15 @@ def cookie_file_name(credentials=None):
     exit(1)
 
 
-def login(sb):
+def login(sb: BaseCase):
     try_bypass_turnstile(
         sb,
         "https://sso.crunchyroll.com/authorize?client_id=noaihdevm_6iyg0a8l0q&redirect_uri=https%3A%2F%2Fwww.crunchyroll.com%2Fcallback&response_type=cookie&state=%2F",
     )
     credentials = load_credentials()
-    sb.type("input[name='email']", credentials["email"])
-    sb.type("input[type='password']", credentials["password"])
-    sb.click("button[data-t='login-button']", by="css selector")
+    sb.type(selector="input[name='email']", text=credentials["email"])
+    sb.type(selector="input[type='password']", text=credentials["password"])
+    sb.click(selector="button[data-t='login-button']", by="css selector")
     screenshot.take(sb)
     # Save cookies
     if not is_homepage_loaded(sb):
@@ -103,7 +105,7 @@ def login(sb):
         print("Check this credentials.json or try again")
         exit(code=1)
     screenshot.take(sb)
-    cookies = sb.driver.get_cookies()
+    cookies = sb.get_cookies()
     with open(cookie_file_name(credentials), "wb") as f:
         pickle.dump(cookies, f)
     print("Logged in")
