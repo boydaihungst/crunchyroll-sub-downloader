@@ -119,12 +119,7 @@ def main():
         uc=True,
         headless=True,
         chromium_arg=(
-            "--headless=new "  # use new headless mode
-            "--mute-audio "  # optional: mute audio
-            "--window-size=1920,1080 "  # important for proper rendering
-            "--disable-gpu "  # improves stability in headless
-            "--disable-dev-shm-usage "  # fixes some Linux crashes
-            "--no-sandbox"  # required in some Linux environments
+            "--headless=new,--mute-audio,--window-size=1920,1080,--disable-gpu,--disable-dev-shm-usage,--no-sandbox"
         ),
     ) as sb:
         init_files()
