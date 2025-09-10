@@ -115,7 +115,7 @@ def parse_args():
 def main():
     url, lang, seasons, force, get_latest_n_episodes = parse_args()
     print("Opening browser...")
-    with SB(uc=True, chromium_arg="--mute-audio") as sb:
+    with SB(uc=True, chromium_arg="--mute-audio --headless=new", headless=True) as sb:
         init_files()
         cookies_file = auth.cookie_file_name()
         if os.path.exists(cookies_file):
