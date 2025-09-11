@@ -114,7 +114,7 @@ def parse_args():
 
 def main():
     url, lang, seasons, force, get_latest_n_episodes = parse_args()
-    print("Opening browser...")
+    print("⏳ Opening browser...")
     with SB(
         uc=True,
         headless=True,
@@ -126,7 +126,7 @@ def main():
         cookies_file = auth.cookie_file_name()
         if os.path.exists(cookies_file):
             sb.open("https://www.crunchyroll.com")
-            print("Checking cookies...")
+            print("🧑‍🍳🍪 Checking cookies...")
             try:
                 with open(cookies_file, "rb") as f:
                     cookies = pickle.load(f)
@@ -134,20 +134,20 @@ def main():
                 for cookie in cookies:
                     sb.driver.add_cookie(cookie)
             except Exception:
-                print("Invalid cookie, removing cookies")
+                print("⚠️ Invalid cookie, removing cookies")
                 if os.path.exists(cookies_file):
                     os.remove(cookies_file)
                 sb.driver.delete_all_cookies()
             sb.driver.refresh()
             if auth.is_logged_in(sb):
                 screenshot.take(sb)
-                print("Reusing old cookies")
+                print("♻️ Reusing old cookies")
             else:
                 screenshot.take(sb)
-                print("Invalid cookies, logging in...")
+                print("⚠️ Invalid cookies, logging in...")
                 auth.login(sb)
         else:
-            print("No cookies, logging in...")
+            print("⚠️ No cookies, logging in...")
             auth.login(sb)
         animes.start_download_anime(sb, url, lang, seasons, force, get_latest_n_episodes)
 

@@ -60,7 +60,7 @@ def is_homepage_loaded(sb: BaseCase, selector=".shell-body", timeout=15):
             continue
         select_profile(sb)
         return True
-    print("Home page not loaded in time")
+    print("❌ Home page not loaded in time")
     return False
 
 
@@ -70,11 +70,11 @@ def load_credentials():
             credentials = json.load(f)
             return credentials
     except FileNotFoundError:
-        print("Error: credentials.json not found.")
+        print("❌ Error: credentials.json not found.")
     except PermissionError:
-        print("Error: Permission denied while accessing credentials.json.")
+        print("❌ Error: Permission denied while accessing credentials.json.")
     except Exception as e:
-        print(f"An unexpected error occurred while loading credentials.json: {e}")
+        print(f"❌ An unexpected error occurred while loading credentials.json: {e}")
     exit(1)
 
 
@@ -85,7 +85,7 @@ def cookie_file_name(credentials=None):
         hashed_email = hashlib.sha256(credentials["email"].encode("utf-8-sig")).hexdigest()
         return f"crunchyroll_cookies_{hashed_email}.pkl"
     except Exception as e:
-        print(f"Failed to get cookie file name: {e}")
+        print(f"❌ Failed to get cookie file name: {e}")
     exit(1)
 
 
@@ -102,10 +102,10 @@ def login(sb: BaseCase):
     # Save cookies
     if not is_homepage_loaded(sb):
         screenshot.take(sb)
-        print("Check this credentials.json or try again")
+        print("⏳ Check this credentials.json or try again")
         exit(code=1)
     screenshot.take(sb)
     cookies = sb.get_cookies()
     with open(cookie_file_name(credentials), "wb") as f:
         pickle.dump(cookies, f)
-    print("Logged in")
+    print("✅ Logged in")

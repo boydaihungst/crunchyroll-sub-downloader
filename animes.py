@@ -40,7 +40,7 @@ def start_download_anime(
     force_download=False,
     get_latest_n_episodes: None | int = None,
 ):
-    print("Loading animes list")
+    print("⏳ Loading animes list")
 
     list_downloaded = []
     with open(os.path.join("output", "saved_file.json"), "r") as f2:
@@ -53,7 +53,7 @@ def start_download_anime(
     elif any(url in single_url for url in ["/series/", "/watch/"]):
         animes.append({"url": single_url})
     else:
-        print(f"Invalid Episode/Series URL: {single_url}")
+        print(f"❌ Invalid Episode/Series URL: {single_url}")
         exit(code=1)
 
     for anime in animes:
@@ -68,12 +68,12 @@ def start_download_anime(
 
         print(f"--------------------------------------------------------------------------------")
         if not anime.get("url"):
-            print("Missing URL in animes.json")
+            print("❌ Missing URL in animes.json")
             continue
 
         anime["lang"] = anime.get("lang") or []
         if "/series/" in anime.get("url"):
-            print(f"Checking Series URL: {anime['url']}")
+            print(f"⏳ Checking Series URL: {anime['url']}")
             anime["seasons"] = anime.get("seasons") or []
             latest_season = False
             if anime.get("seasons"):
@@ -90,15 +90,15 @@ def start_download_anime(
             for season in anime["seasons"]:
                 handle_season(sb, anime, season, list_downloaded, force_download)
         elif "/watch/" in anime.get("url"):
-            print(f"Checking epsode URL: {anime.get('url')}")
+            print(f"⏳ Checking epsode URL: {anime.get('url')}")
             handle_single_episode(sb, anime.get("url"), anime.get("lang"), list_downloaded, force_download)
         else:
-            print(f"Invalid Epsode/Series URL: {anime.get('url')}")
+            print(f"❌ Invalid Epsode/Series URL: {anime.get('url')}")
 
     with open(os.path.join("output", "latest_downloaded.txt"), "w") as f3:
         if new_downloaded_subtitles:
             print(f"--------------------------------------------------------------------------------")
-            print(f"New subtitles downloaded:")
+            print(f"✅ New subtitles downloaded:")
             f3.write(f"New subtitles downloaded:\n")
             for key, value in new_downloaded_subtitles.items():
                 print(f"    {key}:")
@@ -107,7 +107,7 @@ def start_download_anime(
                     f3.write(f"        {v}\n")
                     print(f"        {v}")
         else:
-            print("No new subtitles.")
+            print("🆗 No new subtitles.")
             f3.write("No new subtitles.\n")
 
 
@@ -119,7 +119,7 @@ def handle_season(sb: BaseCase, series, season, list_downloaded, force_download=
     sb.open(series["url"])
 
     try:
-        print(f"Checking season number: {str(season)}")
+        print(f"⏳ Checking season number: {str(season)}")
         season = select_season_from_dropdown_list(sb, season)
         screenshot.take(sb)
         if not season:
@@ -152,7 +152,7 @@ def handle_single_episode(sb: BaseCase, episode_url, lang=[], list_downloaded=[]
     sb.set_window_size(1920, 1080)
 
     if not season or season <= 0:
-        print("No seasons found")
+        print("❌ No seasons found")
         return
 
     xv = [x for x in list_downloaded if x["url"] == series["url"] and x["season"] == season]
@@ -189,7 +189,7 @@ def get_all_season_indexes(sb: BaseCase) -> tuple[list, int]:
             return [1], 1
 
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"❌ Error: {e}")
         traceback.print_exc()
         screenshot.take(sb)
         # accept_consent(sb)
@@ -208,8 +208,8 @@ def click_load_more_btn(sb: BaseCase):
                 # sb.wait(1)
                 break
     except Exception as e:
-        print("Cannot click load more")
-        print(f"Error: {e}")
+        print("❌ Cannot click load more")
+        print(f"❌ Error: {e}")
         traceback.print_exc()
         return
 
@@ -228,10 +228,10 @@ def select_season_from_dropdown_list(sb: BaseCase, season):
             return season
         else:
             if season != 1:
-                print("Invalid season number, fallback to season 1")
+                print("❌ Invalid season number, fallback to season 1")
             return 1
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"❌ Error: {e}")
         traceback.print_exc()
         screenshot.take(sb)
         # accept_consent(sb)
@@ -262,7 +262,7 @@ def open_episode_url(
         if len(anime["lang"]) > 0 and len(languages_to_download) == 0:
             continue
         if not suppress_download_msg:
-            print(f"Checking episode URL: {str(episode_url)}")
+            print(f"⏳ Checking episode URL: {str(episode_url)}")
         if sb.get_current_url() != episode_url:
             go_to_episode_page(sb, episode_url)
         episode_metadata = get_episode_metadata(sb, season, episode_url)
@@ -280,15 +280,17 @@ def open_episode_url(
         skip_episodes = append_lang_to_skip_urls(skip_episodes, episode_url, downloaded_subtitles_langs)
         log_downloaded_episode(anime, season, skip_episodes)
         if len(downloaded_subtitles) > 0:
-            print("Downloaded new subtiles: " + ", ".join(downloaded_subtitles_langs))
+            print("✅ Downloaded new subtiles: " + ", ".join(downloaded_subtitles_langs))
         if len(languages_to_download) > 0 and len(languages_to_download) != len(downloaded_subtitles_langs):
-            print("Missing subtitles: " + ", ".join(d for d in languages_to_download if d not in downloaded_subtitles))
+            print(
+                "😭 Missing subtitles: " + ", ".join(d for d in languages_to_download if d not in downloaded_subtitles)
+            )
         go_back_to_ep_lists_page(sb, season)
 
 
 def get_episode_metadata(sb: BaseCase, season, episode_url, attempts=3):
     if attempts == 0:
-        print("Error getting episode metadata")
+        print("❌ Error getting episode metadata")
         return
     try:
         iframe = sb.wait_for_element_present(by="css selector", selector="iframe.video-player", timeout=15)
@@ -302,7 +304,7 @@ def get_episode_metadata(sb: BaseCase, season, episode_url, attempts=3):
         screenshot.take(sb)
         sb.driver.switch_to.default_content()
     except:
-        print("Error getting episode metadata, Retrying...")
+        print("❌ Error getting episode metadata, Retrying...")
         iframe = sb.wait_for_element_present(by="css selector", selector="iframe.video-player", timeout=15)
         sb.driver.switch_to.frame(iframe)
         stop_video_play(sb)
@@ -405,7 +407,7 @@ def append_lang_to_skip_urls(skip_episodes, episode_url, episode_langs):
 
 
 def get_list_of_episode_urls(sb: BaseCase):
-    print("Getting list of episode")
+    print("⏳ Getting list of episode")
     element = sb.wait_for_element_present(
         by="css selector", selector=".episode-list .erc-playable-collection", timeout=15
     )
@@ -449,7 +451,7 @@ def wait_for_video_to_play(sb: BaseCase, selector="video", timeout=15):
         )
 
         sb.wait(2)
-    print("Video did not start playing in time")
+    print("❌ Video did not start playing in time")
     return False
 
 
@@ -476,7 +478,7 @@ def stop_video_play(sb: BaseCase, selector="video", timeout=15):
         """
         )
         sb.wait(2)
-    print("Video did not pause in time")
+    print("❌ Video did not pause in time")
     return False
 
 
@@ -498,7 +500,7 @@ def go_to_episode_page(sb: BaseCase, episode_url):
         screenshot.take(sb)
         sb.wait(1)
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"❌ Error: {e}")
         traceback.print_exc()
         screenshot.take(sb)
 
@@ -506,7 +508,7 @@ def go_to_episode_page(sb: BaseCase, episode_url):
 def slowdown_if_restrictions_overlay(sb: BaseCase):
     if sb.is_element_present(by="css selector", selector="#restrictionsOverlay"):
         cooldown = 30
-        print(f"Restrictions overlay detected, waiting {cooldown}s")
+        print(f"⚠️ Restrictions overlay detected, waiting {cooldown}s")
         sb.wait(cooldown)
         slowdown_if_restrictions_overlay(sb)
 
@@ -515,7 +517,7 @@ def go_back_to_ep_lists_page(sb: BaseCase, season):
     try:
         if sb.is_element_clickable(by="css selector", selector='a[data-t="show-title-link"]'):
             sb.click(selector="a.show-title-link", by="css selector")
-            print("Going back to previous page")
+            print("⏳ Going back to previous page")
         else:
             sb.go_back()
         season = select_season_from_dropdown_list(sb, season)
@@ -524,7 +526,7 @@ def go_back_to_ep_lists_page(sb: BaseCase, season):
         click_load_more_btn(sb)
     except Exception as e:
         sb.driver.switch_to.default_content()
-        print(f"Error: {e}")
+        print(f"❌ Error: {e}")
         traceback.print_exc()
         screenshot.take(sb)
 
@@ -537,7 +539,7 @@ def get_series_url_from_watch_page(sb: BaseCase):
             )
             return meta_tag_el.get_attribute("content")
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"❌ Error: {e}")
         traceback.print_exc()
         screenshot.take(sb)
 
@@ -547,7 +549,7 @@ def click_see_more_episodes_from_watch_page(sb: BaseCase):
         if sb.is_element_present(by="css selector", selector='button[data-t="see-more-episodes-btn"]'):
             sb.click(selector='button[data-t="see-more-episodes-btn"]', by="css selector")
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"❌ Error: {e}")
         traceback.print_exc()
         screenshot.take(sb)
 
@@ -557,7 +559,7 @@ def close_see_more_episodes_in_watch_page(sb: BaseCase):
         if sb.is_element_present(by="css selector", selector='button[class^="modal-portal__close-button"]'):
             sb.click(selector='button[class^="modal-portal__close-button"]', by="css selector")
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"❌ Error: {e}")
         traceback.print_exc()
         screenshot.take(sb)
 
