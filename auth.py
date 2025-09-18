@@ -90,13 +90,14 @@ def cookie_file_name(credentials=None):
 
 
 def login(sb: BaseCase):
-    try_bypass_turnstile(
-        sb,
-        "https://sso.crunchyroll.com/authorize?client_id=noaihdevm_6iyg0a8l0q&redirect_uri=https%3A%2F%2Fwww.crunchyroll.com%2Fcallback&response_type=cookie&state=%2F",
+    sb.open(
+        "https://sso.crunchyroll.com/authorize?client_id=kmj7imhjt_q90lcbzzsj&redirect_uri=https%3A%2F%2Fcrunchyroll.com%2Fcallback&response_type=cookie&state=%2Fdiscover",
     )
     credentials = load_credentials()
     sb.type(selector="input[name='email']", text=credentials["email"])
+    screenshot.take(sb)
     sb.type(selector="input[type='password']", text=credentials["password"])
+    screenshot.take(sb)
     sb.click(selector="button[data-t='login-button']", by="css selector")
     screenshot.take(sb)
     # Save cookies

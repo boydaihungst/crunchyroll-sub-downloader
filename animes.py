@@ -12,6 +12,8 @@ from seleniumbase import BaseCase
 import screenshot
 import subtitle_processor
 
+is_debug = os.getenv("DEBUG")
+
 new_downloaded_subtitles = {}
 
 
@@ -407,7 +409,7 @@ def append_lang_to_skip_urls(skip_episodes, episode_url, episode_langs):
 
 
 def get_list_of_episode_urls(sb: BaseCase):
-    print("⏳ Getting list of episode")
+    print("Getting list of episode")
     element = sb.wait_for_element_present(
         by="css selector", selector=".episode-list .erc-playable-collection", timeout=15
     )
@@ -517,7 +519,8 @@ def go_back_to_ep_lists_page(sb: BaseCase, season):
     try:
         if sb.is_element_clickable(by="css selector", selector='a[data-t="show-title-link"]'):
             sb.click(selector="a.show-title-link", by="css selector")
-            print("⏳ Going back to previous page")
+            if is_debug:
+                print("Going back to previous page")
         else:
             sb.go_back()
         season = select_season_from_dropdown_list(sb, season)
