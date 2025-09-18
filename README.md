@@ -158,7 +158,6 @@ For example:
 - Add crunchyroll premium account and password in `credentials.json` file. After first successful login/run, the cookies will be saved in `crunchyroll_cookies_*.pkl` file, now you can remove password from `credentials.json` file, but keep email.
 - Change `seasons`, `langs`, `url` in `animes.json`, then run the command below.
 - You can also download subtitles for specific languages, season numbers and the n number of latest episodes by adding them to the `lang`, `seasons` and `lastest` in animes.json.
-
   - The `url` could be either the anime URL (`/series/`) or the episode URL (`/watch/`). For the episode `seasons` are not needed and will be ignored.
   - Season numbers start from 1 and go up to n, as listed in the season drop-down menu on the Crunchyroll website. Season numbers can be set to `-1` to get the latest season.
   - If `season` and `lang` are not specified, it will download subtitles for all seasons and languages.
@@ -166,7 +165,6 @@ For example:
   - Get only the latest n number of an episode by setting `latest` to `n` number in animes.json. `"latest" = 1` and `"seasons" = [-1]` will download subtitles for the newest episode of the latest season.
 
 - Some popular language codes:
-
   - `"vi-VN", "en-US", "th-TH", "id-ID", "ms-MY", "ja-JP", "ru-RU", "pt-BR", "it-IT", "fr-FR", "es-ES", "es-419", "de-DE", "ar-SA"`
   - If you want to download subtitles for a language that is not listed, you can get rid of `lang` in animes.json to download subtitles for all languages, so you can get the language code.
 
@@ -250,8 +248,17 @@ After editing the `animes.json` file, run command:
 
 If you encounter any issues, please add `DEBUG=true` to the start of the command to get the screenshot of the browser,then open an issue with output log and the screenshots attached (in `screenshots` folder). There could be a screenshot of login screen which you should remove before sending.
 
+For Linux:
+
 ```bash
 DEBUG=true python3 main.py
+```
+
+For Windows:
+
+```bash
+set DEBUG=true
+python3 main.py
 ```
 
 ## License
