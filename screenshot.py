@@ -1,9 +1,10 @@
 import os
 
+import config
+
 
 def take(sb, directory="screenshots", prefix="screenshot"):
-    is_debug = os.getenv("DEBUG")
-    if not is_debug:
+    if not config.DEBUG:
         return
     os.makedirs(directory, exist_ok=True)
 

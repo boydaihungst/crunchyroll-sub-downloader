@@ -8,6 +8,7 @@ from seleniumbase import SB
 
 import animes
 import auth
+import config
 import screenshot
 
 
@@ -102,10 +103,12 @@ def parse_args():
     parser.add_argument(
         "-f", "--force", help="Force to download even if the subtitles is already downloaded", action="store_true"
     )
+    parser.add_argument("-d", "--debug", help="Enable debug mode", action="store_true")
     args = parser.parse_args()
 
     url = args.url
     lang = args.lang or []
+    config.DEBUG = args.debug or False
     seasons = args.season or []
     force = args.force or False
     get_latest_n_episodes = args.latest or None

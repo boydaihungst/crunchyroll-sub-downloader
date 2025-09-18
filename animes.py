@@ -9,10 +9,9 @@ from urllib.parse import urljoin, urlparse
 
 from seleniumbase import BaseCase
 
+import config
 import screenshot
 import subtitle_processor
-
-is_debug = os.getenv("DEBUG")
 
 new_downloaded_subtitles = {}
 
@@ -519,7 +518,7 @@ def go_back_to_ep_lists_page(sb: BaseCase, season):
     try:
         if sb.is_element_clickable(by="css selector", selector='a[data-t="show-title-link"]'):
             sb.click(selector="a.show-title-link", by="css selector")
-            if is_debug:
+            if config.DEBUG:
                 print("Going back to previous page")
         else:
             sb.go_back()

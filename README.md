@@ -246,19 +246,10 @@ After editing the `animes.json` file, run command:
 > [!IMPORTANT]
 > Crunchyroll has limited the number of devices that can access their website for each account. You should deactivate other devices if encountered with the error "Too many devices". Follow this link: https://www.crunchyroll.com/account/devices
 
-If you encounter any issues, please add `DEBUG=true` to the start of the command to get the screenshot of the browser,then open an issue with output log and the screenshots attached (in `screenshots` folder). There could be a screenshot of login screen which you should remove before sending.
-
-For Linux:
+If you encounter any issues, please run command with `-d` to get the screenshot of the browser, then open an issue ticket with output log and the screenshots attached (in `screenshots` folder). There could be a screenshot of login screen which you should remove before sending.
 
 ```bash
-DEBUG=true python3 main.py
-```
-
-For Windows:
-
-```bash
-set DEBUG=true
-python3 main.py
+python3 main.py -d
 ```
 
 ## License
