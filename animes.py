@@ -137,6 +137,7 @@ def handle_season(sb: BaseCase, series, season, list_downloaded, force_download=
     go_to_url(sb, first_ep_url_in_series)
 
     get_episode_metadata(sb, season, first_ep_url_in_series)
+    # List profile audio language
     episode_urls = get_list_of_episode_urls_in_watch_page(sb)
     screenshot.take(sb)
     if series.get("latest") and episode_urls:
@@ -291,9 +292,11 @@ def open_episode_url(
         )
         downloaded_subtitles_langs = sorted(set(d["lang"] for d in downloaded_subtitles))
 
-        ep_id_list = [v["guid"] for v in episode_metadata["playService"]["versions"]]
-
-        all_ep_urls_from_all_audio = [re.sub(r"(?<=/watch/)[^/]+", ep_id, episode_url) for ep_id in ep_id_list]
+        if episode_metadata["playService"]["versions"]:
+            ep_id_list = [v["guid"] for v in episode_metadata["playService"]["versions"]]
+            all_ep_urls_from_all_audio = [re.sub(r"(?<=/watch/)[^/]+", ep_id, episode_url) for ep_id in ep_id_list]
+        else:
+            all_ep_urls_from_all_audio = [episode_url]
         skip_episodes = append_lang_to_skip_urls(skip_episodes, all_ep_urls_from_all_audio, downloaded_subtitles_langs)
         log_downloaded_episode(anime, season, skip_episodes)
         if len(downloaded_subtitles) > 0:
@@ -327,7 +330,7 @@ def get_episode_metadata(sb: BaseCase, season, episode_url, attempts=3):
                     json.dump(metadata, f, ensure_ascii=False, indent=2)
             original_audio = next((v for v in metadata["playService"]["versions"] if v.get("original") is True), None)
             current_ep_id = get_crunchyroll_id(sb.get_current_url())
-            if current_ep_id != original_audio["guid"]:
+            if original_audio and "guid" in original_audio and current_ep_id != original_audio["guid"]:
                 episode_url = f'https://www.crunchyroll.com/watch/{original_audio["guid"]}'
                 print(f"↩️ Switching to the original audio language: {original_audio["audio_locale"]}")
                 sb.scroll_to_top()
