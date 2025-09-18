@@ -164,9 +164,7 @@ For example:
 
   - Get only the latest n number of an episode by setting `latest` to `n` number in animes.json. `"latest" = 1` and `"seasons" = [-1]` will download subtitles for the newest episode of the latest season.
 
-- Some popular language codes:
-  - `"vi-VN", "en-US", "th-TH", "id-ID", "ms-MY", "ja-JP", "ru-RU", "pt-BR", "it-IT", "fr-FR", "es-ES", "es-419", "de-DE", "ar-SA"`
-  - If you want to download subtitles for a language that is not listed, you can get rid of `lang` in animes.json to download subtitles for all languages, so you can get the language code.
+- [Click here to get list of language code](https://static.crunchyroll.com/config/i18n/v3/timed_text_languages.json)
 
 - Structure of animes.json file (Ignore the comment part before using `--> ...`) :
 

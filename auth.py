@@ -36,8 +36,7 @@ def is_logged_in(sb: BaseCase):
         exit(code=1)
 
     try:
-        sb.wait_for_element(by="css selector", selector=".header-actions .user-actions-item", timeout=10)
-        return sb.is_element_present(by="css selector", selector="div[class^='erc-authenticated-user']")
+        return sb.get_current_url() == "https://www.crunchyroll.com/discover"
     except:
         screenshot.take(sb)
         return sb.is_element_present(by="css selector", selector="div[class^='erc-authenticated-user']")
@@ -90,15 +89,14 @@ def cookie_file_name(credentials=None):
 
 
 def login(sb: BaseCase):
-    sb.open(
-        "https://www.crunchyroll.com/",
-    )
-    sb.wait_for_element(by="css selector", selector="a.cr-login-button", timeout=10)
+    sb.execute_script(f'window.location.href = "https://www.crunchyroll.com/"')
+
+    sb.wait_for_element_present(by="css selector", selector="a.cr-login-button", timeout=10)
     screenshot.take(sb)
     sb.click(selector="a.cr-login-button", by="css selector", timeout=10)
     screenshot.take(sb)
     credentials = load_credentials()
-    sb.wait_for_element(selector="input[name='email']", by="css selector", timeout=10)
+    sb.wait_for_element_present(selector="input[name='email']", by="css selector", timeout=10)
     screenshot.take(sb)
     sb.type(selector="input[name='email']", text=credentials["email"])
     screenshot.take(sb)

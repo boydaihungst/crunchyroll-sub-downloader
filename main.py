@@ -117,19 +117,26 @@ def parse_args():
 
 def main():
     url, lang, seasons, force, get_latest_n_episodes = parse_args()
+    if config.DEBUG:
+        print("🐛 Running in DEBUG mode!")
+
     print("⏳ Opening browser...")
     with SB(
         uc=True,
+        # headless=not config.DEBUG,
         headless=True,
         chromium_arg=(
-            "--headless=new,--mute-audio,--window-size=1920,1080,--disable-gpu,--disable-dev-shm-usage,--no-sandbox"
+            # f"{'--headless=new,' if not config.DEBUG else ''}--mute-audio,--window-size=1920,1080,--no-sandbox"
+            f"--headless=new,--mute-audio,--disable-gpu,--disable-dev-shm-usage,--no-sandbox"
         ),
     ) as sb:
         init_files()
+        sb.set_window_size(1920, 1080)
         cookies_file = auth.cookie_file_name()
         if os.path.exists(cookies_file):
-            sb.open("https://www.crunchyroll.com")
-            print("🧑‍🍳🍪 Checking cookies...")
+            sb.execute_script(f'window.location.href = "https://www.crunchyroll.com/"')
+
+            print("🧑‍🍳 Checking cookies 🍪...")
             try:
                 with open(cookies_file, "rb") as f:
                     cookies = pickle.load(f)

@@ -7,6 +7,7 @@ __pycache__
 downloaded_files
 latest_logs
 output
+mediainfo.json
 
 # Ignore all audio files
 *.mp3
