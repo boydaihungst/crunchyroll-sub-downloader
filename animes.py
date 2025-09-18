@@ -494,7 +494,7 @@ def wait_for_video_to_play(sb: BaseCase, selector="video", timeout=15):
         """
         )
 
-        sb.wait(0.5)
+        sb.wait(1)
     print("❌ Video did not start playing in time")
     return False
 
@@ -521,7 +521,7 @@ def stop_video_play(sb: BaseCase, selector="video", timeout=15):
             }}
         """
         )
-        sb.wait(0.5)
+        sb.wait(1)
     print("❌ Video did not pause in time")
     return False
 
@@ -589,7 +589,7 @@ def is_see_more_episodes_btn_or_list_episodes_present(sb: BaseCase, timeout=15):
             by="css selector", selector="button.see-all-button"
         ) or sb.is_element_present(".erc-episode-list-expanded.episode-list-expanded.state-visible")
         if not is_any_elm_present:
-            sb.wait(0.2)
+            sb.wait(1)
             continue
         return True
     return False
