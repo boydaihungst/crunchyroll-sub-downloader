@@ -125,10 +125,8 @@ def main():
         uc=True,
         # headless=not config.DEBUG,
         headless=True,
-        chromium_arg=(
-            # f"{'--headless=new,' if not config.DEBUG else ''}--mute-audio,--window-size=1920,1080,--no-sandbox"
-            f"--headless=new,--mute-audio,--disable-gpu,--disable-dev-shm-usage,--no-sandbox"
-        ),
+        chromium_arg=f"--headless=new,--mute-audio",
+        # f"{'--headless=new,' if not config.DEBUG else ''}--mute-audio,--window-size=1920,1080,--no-sandbox"
     ) as sb:
         init_files()
         sb.set_window_size(1920, 1080)

@@ -322,7 +322,6 @@ def get_episode_metadata(sb: BaseCase, season, episode_url, attempts=3):
             stop_video_play(sb)
             sb.driver.switch_to.default_content()
 
-            click_see_more_episodes_from_watch_page(sb)
             if config.DEBUG and metadata:
                 with open("mediainfo.json", "w", encoding="utf-8") as f:
                     json.dump(metadata, f, ensure_ascii=False, indent=2)
@@ -527,38 +526,6 @@ def stop_video_play(sb: BaseCase, selector="video", timeout=15):
     return False
 
 
-def go_to_episode_page(sb: BaseCase, episode_url):
-    try:
-        if "/series/" in sb.get_current_url():
-            sb.wait_for_element_present(
-                by="css selector",
-                selector=f"a[href='{urlparse(episode_url).path}']",
-                timeout=15,
-            )
-            go_to_url(sb, episode_url)
-
-        elif "/watch/" in sb.get_current_url():
-            click_see_more_episodes_from_watch_page(sb)
-            sb.wait_for_element_present(
-                by="css selector",
-                selector=f"a[href='{urlparse(episode_url).path}']",
-                timeout=15,
-            )
-            go_to_url(sb, episode_url)
-            sb.click(selector=f"a[href='{urlparse(episode_url).path}']", by="css selector")
-
-        screenshot.take(sb)
-        # accept_consent(sb)
-        sb.wait_for_element_present(by="css selector", selector="iframe.video-player", timeout=15)
-        screenshot.take(sb)
-        # sb.wait(1)
-    except Exception as e:
-        print(f"❌ Error: {e}")
-        if config.DEBUG:
-            traceback.print_exc()
-        screenshot.take(sb)
-
-
 def slowdown_if_restrictions_overlay(sb: BaseCase):
     if sb.is_element_present(by="css selector", selector="#restrictionsOverlay"):
         cooldown = 60
@@ -604,7 +571,7 @@ def click_see_more_episodes_from_watch_page(sb: BaseCase):
         is_see_more_episodes_btn_or_list_episodes_present(sb)
         if not sb.is_element_present(
             by="css selector",
-            selector=".erc-watch-more-episodes .collapsed-section.state-hidden",
+            selector=".erc-episode-list-expanded.episode-list-expanded.state-visible",
         ):
             sb.click(selector="button.see-all-button", by="css selector")
         sb.wait_for_element_present(selector=".erc-watch-more-episodes .collapsed-section.state-hidden")
@@ -622,7 +589,7 @@ def is_see_more_episodes_btn_or_list_episodes_present(sb: BaseCase, timeout=15):
             by="css selector", selector="button.see-all-button"
         ) or sb.is_element_present(".erc-episode-list-expanded.episode-list-expanded.state-visible")
         if not is_any_elm_present:
-            sb.wait(0.1)
+            sb.wait(0.2)
             continue
         return True
     return False
