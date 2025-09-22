@@ -467,7 +467,7 @@ def get_list_of_episode_urls_in_watch_page(sb: BaseCase):
             urljoin(base_url, el.get_attribute("href"))
             for el in sb.find_elements(
                 by="css selector",
-                selector="a[class^='playable-card-mini-static__link']",
+                selector=".episode-list a[class^='playable-card-mini-static__link']",
             )
             if el.get_attribute("href").strip()
         ]
