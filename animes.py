@@ -14,7 +14,7 @@ import config
 import screenshot
 import subtitle_processor
 
-new_downloaded_subtitles = {}
+new_downloaded_subtitles = defaultdict(lambda: defaultdict(list))
 
 
 class AttrDict(dict):
@@ -629,7 +629,6 @@ def is_see_more_episodes_btn_or_list_episodes_present(sb: BaseCase, timeout=15):
 
 def add_new_downloaded_subtitle(series, season_title, episode):
     global new_downloaded_subtitles
-    new_downloaded_subtitles = defaultdict(lambda: defaultdict(list))
     new_downloaded_subtitles[series][season_title].append(episode)
 
 
