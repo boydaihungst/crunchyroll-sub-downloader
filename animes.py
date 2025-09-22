@@ -4,6 +4,7 @@ import os
 import re
 import time
 import traceback
+from collections import defaultdict
 from typing import Any, Optional
 from urllib.parse import urljoin, urlparse
 
@@ -101,12 +102,21 @@ def start_download_anime(
             print(f"--------------------------------------------------------------------------------")
             print(f"✅ New subtitles downloaded:")
             f3.write(f"New subtitles downloaded:\n")
-            for key, value in new_downloaded_subtitles.items():
-                print(f"    {key}:")
-                f3.write(f"    {key}:\n")
-                for v in value:
-                    f3.write(f"        {v}\n")
-                    print(f"        {v}")
+
+            for series, seasons in new_downloaded_subtitles.items():
+                print(f"    {series}:")
+                f3.write(f"    {series}:\n")
+                for season_title, episodes in seasons.items():
+                    if series != season_title:
+                        print(f"        {season_title}")
+                        f3.write(f"        {season_title}\n")
+                        for episode in episodes:
+                            print(f"            {episode}")
+                            f3.write(f"            {episode}\n")
+                    else:
+                        for episode in episodes:
+                            print(f"        {episode}")
+                            f3.write(f"        {episode}\n")
         else:
             print("👌 No new subtitles.")
             f3.write("No new subtitles.\n")
@@ -138,13 +148,13 @@ def handle_season(sb: BaseCase, series, season, list_downloaded, force_download=
 
     get_episode_metadata(sb, season, first_ep_url_in_series)
     # List profile audio language
-    episode_urls = get_list_of_episode_urls_in_watch_page(sb)
+    episode_urls, season_title = get_list_of_episode_urls_in_watch_page(sb)
     screenshot.take(sb)
     if series.get("latest") and episode_urls:
         episode_urls = episode_urls[-series.get("latest") :]
     total_episodes_episodes = len(episode_urls)
 
-    print(f"Total number of episodes in season {season}: {str(total_episodes_episodes)}")
+    print(f"Total number of episodes in {season_title}: {str(total_episodes_episodes)}")
     open_episode_url(sb, series, season, episode_urls, skip_episodes, force_download=force_download)
     screenshot.take(sb)
 
@@ -156,6 +166,8 @@ def handle_single_episode(sb: BaseCase, episode_url, lang=[], list_downloaded=[]
     go_to_url(sb, episode_url)
     series.url = get_series_url_from_watch_page(sb)
     click_see_more_episodes_from_watch_page(sb)
+    sb.wait_for_element_present(by="css selector", selector=".episode-list", timeout=15)
+
     _, season = get_all_season_indexes(sb)
 
     if not season or season <= 0:
@@ -165,7 +177,13 @@ def handle_single_episode(sb: BaseCase, episode_url, lang=[], list_downloaded=[]
     xv = [x for x in list_downloaded if x["url"] == series["url"] and x["season"] == season]
     skip_episodes = list(xv[0]["downloaded"]) if xv else list()
     open_episode_url(
-        sb, series, season, [episode_url], skip_episodes, suppress_download_msg=True, force_download=force_download
+        sb,
+        series,
+        season,
+        [episode_url],
+        skip_episodes,
+        suppress_download_msg=True,
+        force_download=force_download,
     )
 
 
@@ -413,7 +431,8 @@ def save_episode_subtitles(sb: BaseCase, season, tvshow_info, lang_to_download=[
             subtitle_processor.clean_subtitle(output, output, is_replace_font=False)
         add_new_downloaded_subtitle(
             tvshow_info["metadata"]["series_title"],
-            f"S{str(season)}E{tvshow_info["metadata"]["display_episode_number"]} ({list_subtitle_from_crunchyroll[subtitle]["language"]}): {tvshow_info["metadata"]["title"]}",
+            season_title,
+            f"E{tvshow_info["metadata"]["display_episode_number"]} ({list_subtitle_from_crunchyroll[subtitle]["language"]}): {tvshow_info["metadata"]["title"]}",
         )
     return subtitles
 
@@ -461,6 +480,17 @@ def get_list_of_episode_urls_in_watch_page(sb: BaseCase):
     full_url = sb.get_current_url()
     parsed = urlparse(full_url)
     base_url = f"{parsed.scheme}://{parsed.netloc}"
+    season_title = next(
+        (
+            sb.get_text_content(sel)
+            for sel in [
+                '.season-info [class^="select-trigger__title"]',
+                ".episode-list-select h4",
+            ]
+            if sb.is_element_present(selector=sel)
+        ),
+        "",
+    )
 
     if element:
         return [
@@ -470,9 +500,8 @@ def get_list_of_episode_urls_in_watch_page(sb: BaseCase):
                 selector=".episode-list a[class^='playable-card-mini-static__link']",
             )
             if el.get_attribute("href").strip()
-        ]
-
-    return []
+        ], season_title
+    return [], season_title
 
 
 def wait_for_video_to_play(sb: BaseCase, selector="video", timeout=15):
@@ -598,11 +627,10 @@ def is_see_more_episodes_btn_or_list_episodes_present(sb: BaseCase, timeout=15):
     return False
 
 
-def add_new_downloaded_subtitle(key, value):
+def add_new_downloaded_subtitle(series, season_title, episode):
     global new_downloaded_subtitles
-    if key not in new_downloaded_subtitles:
-        new_downloaded_subtitles[key] = []
-    new_downloaded_subtitles[key].append(value)
+    new_downloaded_subtitles = defaultdict(lambda: defaultdict(list))
+    new_downloaded_subtitles[series][season_title].append(episode)
 
 
 def go_to_url(sb: BaseCase, url: str):
