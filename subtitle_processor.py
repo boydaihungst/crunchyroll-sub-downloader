@@ -7,8 +7,20 @@ import ass.data
 
 
 def remove_embedded_fonts(doc: ass.Document):
-    if "Fonts" in doc.sections:
-        del doc.sections["Fonts"]
+    allowed_sections = {
+        "script info",
+        "aegisub project garbage",
+        "v4+ styles",
+        "graphics",
+        "events",
+        "aegisub extradata",
+    }
+
+    # Find sections not in allowed list (case-insensitive)
+    to_remove = [name for name in doc.sections.keys() if name.lower() not in allowed_sections]
+
+    for name in to_remove:
+        del doc.sections[name]
 
 
 def remove_unused_styles(doc: ass.Document, is_replace_font=False):
