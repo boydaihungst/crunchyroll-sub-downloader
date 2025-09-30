@@ -145,7 +145,6 @@ def handle_season(sb: BaseCase, series, season, list_downloaded, force_download=
     ).get_attribute("href")
 
     go_to_url(sb, first_ep_url_in_series)
-
     get_episode_metadata(sb, season, first_ep_url_in_series)
     # List profile audio language
     episode_urls, season_title = get_list_of_episode_urls_in_watch_page(sb)
@@ -476,7 +475,8 @@ def append_lang_to_skip_urls(skip_episodes, updated_episode_urls, episode_langs)
 def get_list_of_episode_urls_in_watch_page(sb: BaseCase):
     click_see_more_episodes_from_watch_page(sb)
     print("Getting list of episode")
-    element = sb.wait_for_element_present(by="css selector", selector=".episode-list", timeout=15)
+    sb.wait_for_element_present(by="css selector", selector=".current-media-wrapper", timeout=15)
+    has_ep_list_elm = sb.is_element_present(by="css selector", selector=".episode-list")
     full_url = sb.get_current_url()
     parsed = urlparse(full_url)
     base_url = f"{parsed.scheme}://{parsed.netloc}"
@@ -492,7 +492,7 @@ def get_list_of_episode_urls_in_watch_page(sb: BaseCase):
         "",
     )
 
-    if element:
+    if has_ep_list_elm:
         return [
             urljoin(base_url, el.get_attribute("href"))
             for el in sb.find_elements(
@@ -501,7 +501,7 @@ def get_list_of_episode_urls_in_watch_page(sb: BaseCase):
             )
             if el.get_attribute("href").strip()
         ], season_title
-    return [], season_title
+    return [parsed.path], season_title
 
 
 def wait_for_video_to_play(sb: BaseCase, selector="video", timeout=15):
