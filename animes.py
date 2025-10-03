@@ -607,7 +607,7 @@ def click_see_more_episodes_from_watch_page(sb: BaseCase):
         )
         if sb.is_element_present(selector="button.see-all-button", by="css selector"):
             sb.click(selector="button.see-all-button", by="css selector")
-            sb.wait_for_element_present(by="css selector", selector=".episode-list .card-now-playing", timeout=16)
+            sb.wait_for_element_present(by="css selector", selector=".episode-list", timeout=16)
     except Exception as e:
         print(f"❌ Error: {e}")
         if config.DEBUG:
