@@ -165,8 +165,6 @@ def handle_single_episode(sb: BaseCase, episode_url, lang=[], list_downloaded=[]
     go_to_url(sb, episode_url)
     series.url = get_series_url_from_watch_page(sb)
     click_see_more_episodes_from_watch_page(sb)
-    sb.wait_for_element_present(by="css selector", selector=".episode-list", timeout=15)
-
     _, season = get_all_season_indexes(sb)
 
     if not season or season <= 0:
@@ -188,6 +186,12 @@ def handle_single_episode(sb: BaseCase, episode_url, lang=[], list_downloaded=[]
 
 def get_all_season_indexes(sb: BaseCase) -> tuple[list, int]:
     try:
+        if "/watch/" in sb.get_current_url() and not sb.is_element_present(selector=".erc-watch-more-episodes"):
+            series_url = get_series_url_from_watch_page(sb)
+            if not series_url:
+                return [1], 1
+            go_to_url(sb, series_url)
+
         wait_for_one_of_elm_present(
             sb, selectors=[".episode-list .erc-playable-collection", ".episode-list-expanded .episode-list"]
         )
@@ -594,16 +598,16 @@ def get_crunchyroll_id(url: str) -> str | None:
 def click_see_more_episodes_from_watch_page(sb: BaseCase):
     """Still load listed of episodes with the same audio language with user profile"""
     try:
+        if not sb.is_element_present(selector=".erc-watch-more-episodes"):
+            return
+
         sb.wait_for_ready_state_complete()
         wait_for_one_of_elm_present(
             sb, selectors=["button.see-all-button", ".erc-episode-list-expanded.episode-list-expanded.state-visible"]
         )
-        if not sb.is_element_present(
-            by="css selector",
-            selector=".erc-episode-list-expanded.episode-list-expanded.state-visible",
-        ) and sb.is_element_present(selector="button.see-all-button"):
+        if sb.is_element_present(selector="button.see-all-button", by="css selector"):
             sb.click(selector="button.see-all-button", by="css selector")
-        sb.wait_for_element_present(by="css selector", selector=".episode-list .card-now-playing", timeout=15)
+            sb.wait_for_element_present(by="css selector", selector=".episode-list .card-now-playing", timeout=16)
     except Exception as e:
         print(f"❌ Error: {e}")
         if config.DEBUG:
