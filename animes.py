@@ -188,13 +188,9 @@ def handle_single_episode(sb: BaseCase, episode_url, lang=[], list_downloaded=[]
 
 def get_all_season_indexes(sb: BaseCase) -> tuple[list, int]:
     try:
-        if "/series/" in sb.get_current_url():
-            sb.wait_for_element_present(
-                by="css selector", selector=".episode-list .erc-playable-collection", timeout=15
-            )
-        elif "/watch/" in sb.get_current_url():
-            sb.wait_for_element_present(by="css selector", selector=".episode-list-expanded .episode-list", timeout=15)
-
+        wait_for_one_of_elm_present(
+            sb, selectors=[".episode-list .erc-playable-collection", ".episode-list-expanded .episode-list"]
+        )
         if sb.is_element_present(by="css selector", selector=".season-info"):
             sb.click(selector=".season-info", by="css selector")
             sb.wait_for_element_present(by="css selector", selector="[class^='dropdown-content__children']", timeout=15)
@@ -304,9 +300,7 @@ def open_episode_url(
             print("No subtitles found!")
             log_downloaded_episode(anime, season, skip_episodes)
             continue
-        downloaded_subtitles = save_episode_subtitles(
-            sb, season, episode_metadata, languages_to_download, languages_to_skip
-        )
+        downloaded_subtitles = save_episode_subtitles(sb, episode_metadata, languages_to_download, languages_to_skip)
         downloaded_subtitles_langs = sorted(set(d["lang"] for d in downloaded_subtitles))
 
         if episode_metadata["playService"]["versions"]:
@@ -379,7 +373,7 @@ def safe_filename(name, replacement="_", max_length=255):
     return safe[:max_length]
 
 
-def save_episode_subtitles(sb: BaseCase, season, tvshow_info, lang_to_download=[], downloaded_language=[]):
+def save_episode_subtitles(sb: BaseCase, tvshow_info, lang_to_download=[], downloaded_language=[]):
     subtitles = []
     list_subtitle_from_crunchyroll = tvshow_info["playService"]["subtitles"]
     series_title = safe_filename(tvshow_info["metadata"]["series_title"])
@@ -482,10 +476,11 @@ def get_list_of_episode_urls_in_watch_page(sb: BaseCase):
     base_url = f"{parsed.scheme}://{parsed.netloc}"
     season_title = next(
         (
-            sb.get_text_content(sel)
+            sb.get_text_content(selector=sel)
             for sel in [
                 '.season-info [class^="select-trigger__title"]',
                 ".episode-list-select h4",
+                ".erc-episode-list-modal h4",
             ]
             if sb.is_element_present(selector=sel)
         ),
@@ -493,13 +488,13 @@ def get_list_of_episode_urls_in_watch_page(sb: BaseCase):
     )
 
     if has_ep_list_elm:
+        ep_elements = sb.find_elements(
+            by="css selector",
+            selector=".episode-list a[class^='playable-card-mini-static__link'], "
+            ".episode-list a[class^='playable-card__thumbnail-wrapper']",
+        )
         return [
-            urljoin(base_url, el.get_attribute("href"))
-            for el in sb.find_elements(
-                by="css selector",
-                selector=".episode-list a[class^='playable-card-mini-static__link']",
-            )
-            if el.get_attribute("href").strip()
+            urljoin(base_url, el.get_attribute("href")) for el in ep_elements if el.get_attribute("href").strip()
         ], season_title
     return [parsed.path], season_title
 
@@ -600,13 +595,15 @@ def click_see_more_episodes_from_watch_page(sb: BaseCase):
     """Still load listed of episodes with the same audio language with user profile"""
     try:
         sb.wait_for_ready_state_complete()
-        is_see_more_episodes_btn_or_list_episodes_present(sb)
+        wait_for_one_of_elm_present(
+            sb, selectors=["button.see-all-button", ".erc-episode-list-expanded.episode-list-expanded.state-visible"]
+        )
         if not sb.is_element_present(
             by="css selector",
             selector=".erc-episode-list-expanded.episode-list-expanded.state-visible",
         ):
             sb.click(selector="button.see-all-button", by="css selector")
-        sb.wait_for_element_present(selector=".erc-watch-more-episodes .collapsed-section.state-hidden")
+        sb.wait_for_element_present(by="css selector", selector=".episode-list .card-now-playing", timeout=15)
     except Exception as e:
         print(f"❌ Error: {e}")
         if config.DEBUG:
@@ -614,12 +611,11 @@ def click_see_more_episodes_from_watch_page(sb: BaseCase):
         screenshot.take(sb)
 
 
-def is_see_more_episodes_btn_or_list_episodes_present(sb: BaseCase, timeout=15):
+def wait_for_one_of_elm_present(sb: BaseCase, selectors=[], timeout=15):
     start = time.time()
     while time.time() - start < timeout:
-        is_any_elm_present = sb.is_element_clickable(
-            by="css selector", selector="button.see-all-button"
-        ) or sb.is_element_present(".erc-episode-list-expanded.episode-list-expanded.state-visible")
+
+        is_any_elm_present = any(sb.is_element_present(selector=sel) for sel in selectors)
         if not is_any_elm_present:
             sb.wait(1)
             continue
