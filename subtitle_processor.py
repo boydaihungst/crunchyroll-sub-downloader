@@ -239,7 +239,11 @@ def remove_unused_styles(doc: ass.Document, is_replace_font=False, is_fucking_cc
                 style.margin_v = 50
                 style.encoding = 1
 
-            if style.name == "Italics" and style.fontname == "Arial Unicode MS" and style.fontsize == 20:
+            if (
+                style.name in ["Italics", "DefaultItalics"]
+                and style.fontname == "Arial Unicode MS"
+                and style.fontsize == 20
+            ):
                 style.fontname = "UVN Sach Vo"
                 style.fontsize = 81
                 style.primary_color = ass.data.Color.from_ass("&H00FFFFFF")
@@ -263,7 +267,7 @@ def remove_unused_styles(doc: ass.Document, is_replace_font=False, is_fucking_cc
                 style.margin_v = 50
                 style.encoding = 1
 
-            if style.name == "On Top" and style.fontname == "Arial Unicode MS" and style.fontsize == 20:
+            if style.name in ["On Top", "DefaultTop"] and style.fontname == "Arial Unicode MS" and style.fontsize == 20:
                 style.fontname = "UVN Sach Vo"
                 style.fontsize = 81
                 style.primary_color = ass.data.Color.from_ass("&H00FFFFFF")
