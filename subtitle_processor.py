@@ -191,6 +191,29 @@ def remove_unused_styles(doc: ass.Document, is_replace_font=False, is_fucking_cc
                 style.margin_v = 50
                 style.encoding = 1
 
+            if style.name in fucking_ccc_styles and style.fontname == "Arial Unicode MS":
+                style.fontname = "UVN Sach Vo"
+                style.fontsize = 81
+                style.primary_color = ass.data.Color.from_ass("&H00FFFFFF")
+                style.secondary_color = ass.data.Color.from_ass("&H00000000")
+                style.outline_color = ass.data.Color.from_ass("&H4D000000")
+                style.back_color = ass.data.Color.from_ass("&HBC000000")
+                style.bold = True
+                style.italic = False
+                style.underline = False
+                style.strike_out = False
+                style.scale_x = 80
+                style.scale_y = 100
+                style.spacing = 0
+                style.angle = 0
+                style.border_style = 1
+                style.outline = 3
+                style.shadow = 3
+                style.margin_l = 60
+                style.margin_r = 60
+                style.margin_v = 50
+                style.encoding = 1
+
             if style.name == "Default" and style.fontname == "Arial Unicode MS" and style.fontsize == 20:
                 style.fontname = "UVN Sach Vo"
                 style.fontsize = 81
