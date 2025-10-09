@@ -50,7 +50,7 @@ def select_profile(sb: BaseCase):
         return True
 
 
-def is_homepage_loaded(sb: BaseCase, selector=".shell-body", timeout=15):
+def is_homepage_loaded(sb: BaseCase, selector=".shell-body", timeout=30):
     start = time.time()
     while time.time() - start < timeout:
         is_loading = sb.is_element_present(by="css selector", selector=selector)
@@ -89,15 +89,16 @@ def cookie_file_name(credentials=None):
 
 
 def login(sb: BaseCase):
-    sb.execute_script(f'window.location.href = "https://www.crunchyroll.com/"')
+    if sb.get_current_url() != "https://www.crunchyroll.com/":
+        sb.execute_script(f'window.location.href = "https://www.crunchyroll.com/"')
     screenshot.take(sb)
 
-    sb.wait_for_element_present(by="css selector", selector="a.cr-login-button", timeout=10)
+    sb.wait_for_element_present(by="css selector", selector="a.cr-login-button", timeout=30)
     screenshot.take(sb)
-    sb.click(selector="a.cr-login-button", by="css selector", timeout=10)
+    sb.click(selector="a.cr-login-button", by="css selector", timeout=30)
     screenshot.take(sb)
     credentials = load_credentials()
-    sb.wait_for_element_present(selector="input[name='email']", by="css selector", timeout=10)
+    sb.wait_for_element_present(selector="input[name='email']", by="css selector", timeout=30)
     screenshot.take(sb)
     sb.type(selector="input[name='email']", text=credentials["email"])
     screenshot.take(sb)

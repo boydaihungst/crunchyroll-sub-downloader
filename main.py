@@ -4,7 +4,7 @@ import os
 import pickle
 import textwrap
 
-from seleniumbase import SB
+from seleniumbase import SB, BaseCase
 
 import animes
 import auth
@@ -111,8 +111,11 @@ def parse_args():
             Set proxy to bypass geo restrictions. Better to use US proxy.
             Make sure to run "pip install -r requirements.txt" to update dependencies if you upgraded from older version (which doesn't support -p --proxy).
 
-            If -p is present but no value follows, it will use this default proxy, so make sure to add -p at the end of the command:
+            If -p is present but no value follows, it will use this default proxy:
                 GeoBypassCommunity-US:UseWithRespect@us.community-proxy.meganeko.dev:5445
+
+            List of free proxies: https://free-proxy-list.net/en/us-proxy.html
+            Some bad proxy with flagged IP will trigger cloudflare, in that case use difference proxy
 
             Examples: 
                 -p USER:PASS@HOST:PORT
@@ -120,7 +123,6 @@ def parse_args():
                 -p HOST:PORT
                 -p HOST
                 -p
-            List of free proxies: https://free-proxy-list.net/en/us-proxy.html
             """
         ),
         nargs="?",
@@ -142,8 +144,41 @@ def parse_args():
     return url, lang, seasons, force, get_latest_n_episodes, proxy
 
 
+def process_crawl(sb: BaseCase, parsed_args: tuple):
+    url, lang, seasons, force, get_latest_n_episodes, _ = parsed_args
+    cookies_file = auth.cookie_file_name()
+    if os.path.exists(cookies_file):
+        screenshot.take(sb)
+
+        print("🧑‍🍳 Checking cookies 🍪...")
+        try:
+            with open(cookies_file, "rb") as f:
+                cookies = pickle.load(f)
+
+            for cookie in cookies:
+                sb.driver.add_cookie(cookie)
+        except Exception:
+            print("⚠️ Invalid cookie, removing cookies")
+            if os.path.exists(cookies_file):
+                os.remove(cookies_file)
+            sb.driver.delete_all_cookies()
+        sb.driver.refresh()
+        if auth.is_logged_in(sb):
+            screenshot.take(sb)
+            print("♻️ Reusing old cookies")
+        else:
+            screenshot.take(sb)
+            print("⚠️ Invalid cookies, logging in...")
+            auth.login(sb)
+    else:
+        print("⚠️ No cookies, logging in...")
+        auth.login(sb)
+    animes.start_download_anime(sb, url, lang, seasons, force, get_latest_n_episodes)
+
+
 def main():
-    url, lang, seasons, force, get_latest_n_episodes, proxy = parse_args()
+    parsed_args = parse_args()
+    proxy = parsed_args[5]
     if config.DEBUG:
         print("🐛 Running in DEBUG mode!")
 
@@ -154,38 +189,27 @@ def main():
         proxy=proxy,
         chromium_arg="--headless=new, --mute-audio",
     ) as sb:
-
         init_files()
-        sb.set_window_size(1920, 1080)
-        cookies_file = auth.cookie_file_name()
-        if os.path.exists(cookies_file):
-            sb.execute_script(f'window.location.href = "https://www.crunchyroll.com/"')
-            screenshot.take(sb)
+        # sb.set_window_size(1920, 1080)
+        sb.execute_script(f'window.location.href = "https://www.crunchyroll.com/"')
+        screenshot.take(sb)
+        sb.wait_for_any_of_elements_present(
+            "a[href^='https://www.cloudflare.com']", ".cr-main-layout", ".erc-root-layout"
+        )
+        screenshot.take(sb)
+        if sb.is_element_present("[href^='https://www.cloudflare.com']"):
+            print("⚠️ Bad proxy! Cloudflare is triggered! Switching to head mode")
 
-            print("🧑‍🍳 Checking cookies 🍪...")
-            try:
-                with open(cookies_file, "rb") as f:
-                    cookies = pickle.load(f)
-
-                for cookie in cookies:
-                    sb.driver.add_cookie(cookie)
-            except Exception:
-                print("⚠️ Invalid cookie, removing cookies")
-                if os.path.exists(cookies_file):
-                    os.remove(cookies_file)
-                sb.driver.delete_all_cookies()
-            sb.driver.refresh()
-            if auth.is_logged_in(sb):
-                screenshot.take(sb)
-                print("♻️ Reusing old cookies")
-            else:
-                screenshot.take(sb)
-                print("⚠️ Invalid cookies, logging in...")
-                auth.login(sb)
+            with SB(
+                uc=True,
+                headless=False,
+                proxy=proxy,
+                chromium_arg="--mute-audio",
+            ) as sb:
+                # sb.execute_script(f'window.location.href = "https://www.crunchyroll.com/"')
+                process_crawl(sb, parsed_args)
         else:
-            print("⚠️ No cookies, logging in...")
-            auth.login(sb)
-        animes.start_download_anime(sb, url, lang, seasons, force, get_latest_n_episodes)
+            process_crawl(sb, parsed_args)
 
 
 if __name__ == "__main__":

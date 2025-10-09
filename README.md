@@ -137,7 +137,9 @@ options:
 
                         If -p is present but no value follows, it will use this default proxy:
                             GeoBypassCommunity-US:UseWithRespect@us.community-proxy.meganeko.dev:5445
+
                         List of free proxies: https://free-proxy-list.net/en/us-proxy.html
+                        Some bad proxy with flagged IP will trigger cloudflare, in that case use difference proxy
 
                         Examples:
                             -p USER:PASS@HOST:PORT
