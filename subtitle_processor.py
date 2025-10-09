@@ -191,7 +191,7 @@ def remove_unused_styles(doc: ass.Document, is_replace_font=False, is_fucking_cc
                 style.margin_v = 50
                 style.encoding = 1
 
-            if style.name in fucking_ccc_styles and style.fontname == "Arial Unicode MS":
+            if style.name in fucking_ccc_styles and "Arial Unicode MS" in style.fontname:
                 style.fontname = "UVN Sach Vo"
                 style.fontsize = 81
                 style.primary_color = ass.data.Color.from_ass("&H00FFFFFF")
@@ -214,7 +214,7 @@ def remove_unused_styles(doc: ass.Document, is_replace_font=False, is_fucking_cc
                 style.margin_v = 50
                 style.encoding = 1
 
-            if style.name == "Default" and style.fontname == "Arial Unicode MS" and style.fontsize == 20:
+            if style.name == "Default" and "Arial Unicode MS" in style.fontname and style.fontsize == 20:
                 style.fontname = "UVN Sach Vo"
                 style.fontsize = 81
                 style.primary_color = ass.data.Color.from_ass("&H00FFFFFF")
@@ -238,7 +238,7 @@ def remove_unused_styles(doc: ass.Document, is_replace_font=False, is_fucking_cc
                 style.margin_v = 50
                 style.encoding = 1
 
-            if style.name == "OS" and style.fontname == "Arial Unicode MS" and style.fontsize == 18:
+            if style.name == "OS" and "Arial Unicode MS" in style.fontname and style.fontsize == 18:
                 style.fontname = "UVN Sach Vo"
                 style.fontsize = 81
                 style.primary_color = ass.data.Color.from_ass("&H00FFFFFF")
@@ -264,7 +264,7 @@ def remove_unused_styles(doc: ass.Document, is_replace_font=False, is_fucking_cc
 
             if (
                 style.name in ["Italics", "DefaultItalics"]
-                and style.fontname == "Arial Unicode MS"
+                and "Arial Unicode MS" in style.fontname
                 and style.fontsize == 20
             ):
                 style.fontname = "UVN Sach Vo"
@@ -290,7 +290,7 @@ def remove_unused_styles(doc: ass.Document, is_replace_font=False, is_fucking_cc
                 style.margin_v = 50
                 style.encoding = 1
 
-            if style.name in ["On Top", "DefaultTop"] and style.fontname == "Arial Unicode MS" and style.fontsize == 20:
+            if style.name in ["On Top", "DefaultTop"] and "Arial Unicode MS" in style.fontname and style.fontsize == 20:
                 style.fontname = "UVN Sach Vo"
                 style.fontsize = 81
                 style.primary_color = ass.data.Color.from_ass("&H00FFFFFF")
@@ -314,7 +314,7 @@ def remove_unused_styles(doc: ass.Document, is_replace_font=False, is_fucking_cc
                 style.margin_v = 50
                 style.encoding = 1
 
-            if style.name == "DefaultLow" and style.fontname == "Arial Unicode MS" and style.fontsize == 20:
+            if style.name == "DefaultLow" and "Arial Unicode MS" in style.fontname and style.fontsize == 20:
                 style.fontname = "UVN Sach Vo"
                 style.fontsize = 81
                 style.primary_color = ass.data.Color.from_ass("&H00FFFFFF")

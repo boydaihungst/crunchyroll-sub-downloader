@@ -131,6 +131,22 @@ options:
                             -L 1 -s -1   Download subtitles for only the newest episode of the newest season.
 
   -f, --force           Force to download even if the subtitles is already downloaded
+
+  -p, --proxy [PROXY]   Set proxy to bypass geo restrictions. Better to use US proxy.
+                        Make sure to run "pip install -r requirements.txt" to update dependencies if you upgraded from older version (which doesn't support -p --proxy).
+
+                        If -p is present but no value follows, it will use this default proxy:
+                            GeoBypassCommunity-US:UseWithRespect@us.community-proxy.meganeko.dev:5445
+                        List of free proxies: https://free-proxy-list.net/en/us-proxy.html
+
+                        Examples:
+                            -p USER:PASS@HOST:PORT
+                            -p USER:PASS@HOST
+                            -p HOST:PORT
+                            -p HOST
+                            -p
+
+  -d, --debug           Enable debug mode
 ```
 
 For example:

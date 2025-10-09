@@ -103,6 +103,32 @@ def parse_args():
     parser.add_argument(
         "-f", "--force", help="Force to download even if the subtitles is already downloaded", action="store_true"
     )
+    parser.add_argument(
+        "-p",
+        "--proxy",
+        help=textwrap.dedent(
+            """\
+            Set proxy to bypass geo restrictions. Better to use US proxy.
+            Make sure to run "pip install -r requirements.txt" to update dependencies if you upgraded from older version (which doesn't support -p --proxy).
+
+            If -p is present but no value follows, it will use this default proxy, so make sure to add -p at the end of the command:
+                GeoBypassCommunity-US:UseWithRespect@us.community-proxy.meganeko.dev:5445
+
+            Examples: 
+                -p USER:PASS@HOST:PORT
+                -p USER:PASS@HOST
+                -p HOST:PORT
+                -p HOST
+                -p
+            List of free proxies: https://free-proxy-list.net/en/us-proxy.html
+            """
+        ),
+        nargs="?",
+        const="GeoBypassCommunity-US:UseWithRespect@us.community-proxy.meganeko.dev:5445",  # used when -p is present but no value follows
+        default=None,  # used when -p is not present at all
+        type=str,
+    )
+
     parser.add_argument("-d", "--debug", help="Enable debug mode", action="store_true")
     args = parser.parse_args()
 
@@ -112,27 +138,29 @@ def parse_args():
     seasons = args.season or []
     force = args.force or False
     get_latest_n_episodes = args.latest or None
-    return url, lang, seasons, force, get_latest_n_episodes
+    proxy = args.proxy
+    return url, lang, seasons, force, get_latest_n_episodes, proxy
 
 
 def main():
-    url, lang, seasons, force, get_latest_n_episodes = parse_args()
+    url, lang, seasons, force, get_latest_n_episodes, proxy = parse_args()
     if config.DEBUG:
         print("🐛 Running in DEBUG mode!")
 
     print("⏳ Opening browser...")
     with SB(
         uc=True,
-        # headless=not config.DEBUG,
-        headless=True,
-        chromium_arg=f"--headless=new,--mute-audio",
-        # f"{'--headless=new,' if not config.DEBUG else ''}--mute-audio,--window-size=1920,1080,--no-sandbox"
+        headless=not config.DEBUG,
+        proxy=proxy,
+        chromium_arg=f"{'--headless=new,' if not config.DEBUG else ''}--mute-audio",
     ) as sb:
+
         init_files()
         sb.set_window_size(1920, 1080)
         cookies_file = auth.cookie_file_name()
         if os.path.exists(cookies_file):
             sb.execute_script(f'window.location.href = "https://www.crunchyroll.com/"')
+            screenshot.take(sb)
 
             print("🧑‍🍳 Checking cookies 🍪...")
             try:
