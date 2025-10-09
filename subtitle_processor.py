@@ -145,7 +145,7 @@ def remove_embedded_fonts(doc: ass.Document):
 
 def remove_unused_styles(doc: ass.Document, is_replace_font=False, is_fucking_ccc_sub=False):
     used_styles = set(event.style for event in doc.events if isinstance(event, ass.Dialogue))
-    doc.styles = [style for style in doc.styles if style.name in used_styles]
+    doc.styles = [style for style in doc.styles if (style.name in used_styles or style.name.lower() == "default")]
     if is_replace_font:
         doc.info["PlayResX"] = "1920"
         doc.info["PlayResY"] = "1080"
@@ -163,12 +163,7 @@ def remove_unused_styles(doc: ass.Document, is_replace_font=False, is_fucking_cc
         ]
 
         for style in doc.styles:
-            if (
-                is_fucking_ccc_sub
-                and style.name in fucking_ccc_styles
-                and "monospace" in style.fontname
-                and style.fontsize == 16
-            ):
+            if is_fucking_ccc_sub and style.name in fucking_ccc_styles and "monospace" in style.fontname:
                 style.fontname = "UVN Sach Vo"
                 style.fontsize = 81
                 style.primary_color = ass.data.Color.from_ass("&H00FFFFFF")
@@ -190,6 +185,7 @@ def remove_unused_styles(doc: ass.Document, is_replace_font=False, is_fucking_cc
                 style.margin_r = 60
                 style.margin_v = 50
                 style.encoding = 1
+                continue
 
             if style.name in fucking_ccc_styles and "Arial Unicode MS" in style.fontname:
                 style.fontname = "UVN Sach Vo"
@@ -213,6 +209,7 @@ def remove_unused_styles(doc: ass.Document, is_replace_font=False, is_fucking_cc
                 style.margin_r = 60
                 style.margin_v = 50
                 style.encoding = 1
+                continue
 
             if style.name == "Default" and "Arial Unicode MS" in style.fontname and style.fontsize == 20:
                 style.fontname = "UVN Sach Vo"
@@ -237,6 +234,7 @@ def remove_unused_styles(doc: ass.Document, is_replace_font=False, is_fucking_cc
                 style.margin_r = 60
                 style.margin_v = 50
                 style.encoding = 1
+                continue
 
             if style.name == "OS" and "Arial Unicode MS" in style.fontname and style.fontsize == 18:
                 style.fontname = "UVN Sach Vo"
@@ -261,6 +259,7 @@ def remove_unused_styles(doc: ass.Document, is_replace_font=False, is_fucking_cc
                 style.margin_r = 60
                 style.margin_v = 50
                 style.encoding = 1
+                continue
 
             if (
                 style.name in ["Italics", "DefaultItalics"]
@@ -289,6 +288,7 @@ def remove_unused_styles(doc: ass.Document, is_replace_font=False, is_fucking_cc
                 style.margin_r = 60
                 style.margin_v = 50
                 style.encoding = 1
+                continue
 
             if style.name in ["On Top", "DefaultTop"] and "Arial Unicode MS" in style.fontname and style.fontsize == 20:
                 style.fontname = "UVN Sach Vo"
@@ -313,6 +313,7 @@ def remove_unused_styles(doc: ass.Document, is_replace_font=False, is_fucking_cc
                 style.margin_r = 60
                 style.margin_v = 50
                 style.encoding = 1
+                continue
 
             if style.name == "DefaultLow" and "Arial Unicode MS" in style.fontname and style.fontsize == 20:
                 style.fontname = "UVN Sach Vo"
@@ -337,6 +338,7 @@ def remove_unused_styles(doc: ass.Document, is_replace_font=False, is_fucking_cc
                 style.margin_r = 60
                 style.margin_v = 50
                 style.encoding = 1
+                continue
 
             if style.fontname == "Noto Sans" and style.fontsize == 100:
                 style.fontname = "UVN Sach Vo"
@@ -361,6 +363,34 @@ def remove_unused_styles(doc: ass.Document, is_replace_font=False, is_fucking_cc
                 style.margin_r = 60
                 style.margin_v = 50
                 style.encoding = 1
+                continue
+
+        if not doc.styles:
+            style = ass.Style()
+            style.name = "Default"
+            style.fontname = "UVN Sach Vo"
+            style.fontsize = 81
+            style.primary_color = ass.data.Color.from_ass("&H00FFFFFF")
+            style.secondary_color = ass.data.Color.from_ass("&H00000000")
+            style.outline_color = ass.data.Color.from_ass("&H4D000000")
+            style.back_color = ass.data.Color.from_ass("&HBC000000")
+            style.bold = True
+            style.italic = False
+            style.underline = False
+            style.strike_out = False
+            style.scale_x = 80
+            style.scale_y = 100
+            style.spacing = 0
+            style.angle = 0
+            style.border_style = 1
+            style.outline = 3
+            style.shadow = 3
+            style.alignment = 2
+            style.margin_l = 60
+            style.margin_r = 60
+            style.margin_v = 50
+            style.encoding = 1
+            doc.styles.append(style)
 
 
 def clean_subtitle(input_file, output_file, is_replace_font=False):
