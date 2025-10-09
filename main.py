@@ -190,7 +190,7 @@ def main():
         chromium_arg="--headless=new, --mute-audio",
     ) as sb:
         init_files()
-        # sb.set_window_size(1920, 1080)
+        sb.set_window_size(1920, 1080)
         sb.execute_script(f'window.location.href = "https://www.crunchyroll.com/"')
         screenshot.take(sb)
         sb.wait_for_any_of_elements_present(

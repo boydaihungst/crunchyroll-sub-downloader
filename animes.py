@@ -85,6 +85,10 @@ def start_download_anime(
                         break
             if (not anime.get("seasons")) or latest_season:
                 go_to_url(sb, anime.get("url"))
+                if sb.is_element_present(selector='[class^="empty-state__container"]'):
+                    print("❌ This series or season isn't available in your country")
+                    continue
+
                 anime["seasons"], _ = get_all_season_indexes(sb) or []
                 if latest_season:
                     anime["seasons"] = [anime["seasons"][-1]] if anime["seasons"] else []
@@ -131,6 +135,10 @@ def handle_season(sb: BaseCase, series, season, list_downloaded, force_download=
         go_to_url(sb, series["url"])
 
     print(f"⏳ Checking season number: {str(season)}")
+    if sb.is_element_present(selector='[class^="empty-state__container"]'):
+        print("❌ This series or season isn't available in your country")
+        return
+
     season = select_season_from_dropdown_list(sb, season)
     screenshot.take(sb)
     if not season:
@@ -163,9 +171,16 @@ def handle_single_episode(sb: BaseCase, episode_url, lang=[], list_downloaded=[]
     series.lang = lang or []
 
     go_to_url(sb, episode_url)
+    if sb.is_element_present(selector='meta[name="prerender-status-code"][content="404"]'):
+        print("❌ This series or season isn't available in your country")
+        return
+
     series.url = get_series_url_from_watch_page(sb)
     click_see_more_episodes_from_watch_page(sb)
     _, season = get_all_season_indexes(sb)
+    if sb.is_element_present(selector='[class^="empty-state__container"]'):
+        print("❌ This series or season isn't available in your country")
+        return
 
     if not season or season <= 0:
         print("❌ No seasons found")
@@ -193,7 +208,9 @@ def get_all_season_indexes(sb: BaseCase) -> tuple[list, int]:
             go_to_url(sb, series_url)
 
         sb.wait_for_any_of_elements_present(
-            ".episode-list .erc-playable-collection", ".episode-list-expanded .episode-list"
+            '[class^="empty-state__container"]',
+            ".episode-list .erc-playable-collection",
+            ".episode-list-expanded .episode-list",
         )
         if sb.is_element_present(by="css selector", selector=".season-info"):
             sb.click(selector=".season-info", by="css selector")
