@@ -150,9 +150,9 @@ def main():
     print("⏳ Opening browser...")
     with SB(
         uc=True,
-        headless=not config.DEBUG,
+        headless=True,
         proxy=proxy,
-        chromium_arg=f"{'--headless=new,' if not config.DEBUG else ''}--mute-audio",
+        chromium_arg="--headless=new, --mute-audio",
     ) as sb:
 
         init_files()
