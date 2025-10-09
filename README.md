@@ -132,10 +132,10 @@ options:
 
   -f, --force           Force to download even if the subtitles is already downloaded
 
-  -p, --proxy [PROXY]   Set proxy to bypass geo restrictions. Better to use US proxy.
+  -p, --proxy [PROXY]   Set proxy to bypass geo restrictions. Available subtitle languages are depend on the geo location.
                         Make sure to run "pip install -r requirements.txt" to update dependencies if you upgraded from older version (which doesn't support -p --proxy).
 
-                        If -p is present but no value follows, it will use this default proxy:
+                        If -p is present but no value follows, it will use this default US proxy:
                             GeoBypassCommunity-US:UseWithRespect@us.community-proxy.meganeko.dev:5445
 
                         List of free proxies: https://free-proxy-list.net/en/us-proxy.html
