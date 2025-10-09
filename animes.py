@@ -450,7 +450,7 @@ def save_episode_subtitles(sb: BaseCase, tvshow_info, lang_to_download=[], downl
             }
         )
         if list_subtitle_from_crunchyroll[subtitle]["language"] == "vi-VN":
-            subtitle_processor.clean_subtitle(output, output, is_replace_font=False)
+            subtitle_processor.clean_subtitle(output, output, is_replace_font=True)
         else:
             subtitle_processor.clean_subtitle(output, output, is_replace_font=False)
         add_new_downloaded_subtitle(
